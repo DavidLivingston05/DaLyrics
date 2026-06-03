@@ -422,8 +422,8 @@ export default function PresentationList({
 
   const fuzzyMatch = (text: string, query: string): boolean => {
     if (!query) return true;
-    const t = text.toLowerCase();
-    const q = query.toLowerCase();
+    const t = text.toLowerCase().normalize('NFC');
+    const q = query.toLowerCase().normalize('NFC');
 
     // Exact substring match
     if (t.includes(q)) return true;
@@ -436,6 +436,18 @@ export default function PresentationList({
     if (qi === q.length) return true;
 
     return false;
+  };
+
+  const highlightTitle = (title: string) => {
+    if (!searchQuery) return title;
+    const t = title.toLowerCase().normalize('NFC');
+    const q = searchQuery.toLowerCase().normalize('NFC');
+    const idx = t.indexOf(q);
+    if (idx === -1) return title;
+    const before = title.slice(0, idx);
+    const match = title.slice(idx, idx + searchQuery.length);
+    const after = title.slice(idx + searchQuery.length);
+    return <>{before}<span className="text-orange-400 font-extrabold">{match}</span>{after}</>;
   };
 
   const filteredPresentations = useMemo(() => {
@@ -460,16 +472,6 @@ export default function PresentationList({
 
     return result;
   }, [presentations, searchQuery, sortBy]);
-
-  const highlightTitle = (title: string) => {
-    if (!searchQuery) return title;
-    const idx = title.toLowerCase().indexOf(searchQuery.toLowerCase());
-    if (idx === -1) return title;
-    const before = title.slice(0, idx);
-    const match = title.slice(idx, idx + searchQuery.length);
-    const after = title.slice(idx + searchQuery.length);
-    return <>{before}<span className="text-orange-400 font-extrabold">{match}</span>{after}</>;
-  };
 
   const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
     const target = e.currentTarget;
