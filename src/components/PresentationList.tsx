@@ -420,9 +420,27 @@ export default function PresentationList({
     setEditingId(null);
   };
 
+  const fuzzyMatch = (text: string, query: string): boolean => {
+    if (!query) return true;
+    const t = text.toLowerCase();
+    const q = query.toLowerCase();
+
+    // Exact substring match
+    if (t.includes(q)) return true;
+
+    // Character-order fuzzy match
+    let qi = 0;
+    for (let i = 0; i < t.length && qi < q.length; i++) {
+      if (t[i] === q[qi]) qi++;
+    }
+    if (qi === q.length) return true;
+
+    return false;
+  };
+
   const filteredPresentations = useMemo(() => {
     let result = presentations.filter((p) =>
-      p.title.toLowerCase().includes(searchQuery.toLowerCase())
+      fuzzyMatch(p.title, searchQuery)
     );
 
     if (sortBy === 'alphabetical') {
