@@ -1,0 +1,6 @@
+{
+  "name": "DALYRIC",
+  "description": "An ultra-simple, distraction-free presentation tool featuring a clean 3-column lyrics editor, slide generator, and live preview stream.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
