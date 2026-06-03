@@ -21,7 +21,14 @@ export default function FullscreenProjection() {
     return { text: '', isBlackout: false, isTextCleared: false, isLowerThird: false, copyright: '', styleSettings: null, liveCaptionText: '', activeBackground: null, activeMedia: null };
   });
 
-  const { text, isBlackout, isTextCleared, isLowerThird, activeMode = 'SONGS', copyright, styleSettings, liveCaptionText, activeBackground, activeMedia } = packet;
+  const {
+    text, isBlackout, isTextCleared, isLowerThird, activeMode = 'SONGS',
+    copyright, styleSettings, liveCaptionText, activeBackground, activeMedia,
+    bibleVerseFontSize = 56, bibleVerseFontColor = '#ffffff',
+    bibleVerseBgColor = '#000000', bibleVerseBgOpacity = 40,
+    bibleHeadingFontSize = 36, bibleHeadingFontColor = '#d4d4d8',
+    bibleHeadingBgColor = '#000000', bibleHeadingBgOpacity = 40,
+  } = packet;
   const ss = styleSettings || {};
 
   // 1. Chords Stripping: Strip bracketed musician chords from the text for clean stage display
@@ -436,31 +443,63 @@ export default function FullscreenProjection() {
         {!isBlackout ? (
           <div className="relative z-10 w-full h-full flex flex-col p-[2%]">
             
-            {/* 2. FULLSCREEN CENTER LYRICS (Only when lower third is NOT active) */}
+            {/* 2. FULLSCREEN CENTER CONTENT */}
             {!isTextCleared && text && !(isLowerThird || ss.lowerThirdMode === 'lyrics') && ss.lowerThirdMode !== 'speaker' && ss.lowerThirdMode !== 'ticker' && (
-              <motion.div 
-                className="flex-1 flex flex-col items-center justify-center min-h-0"
-                {...loopProps}
-              >
-                {activeMode === 'BIBLE' && copyright && (
-                  <div className="flex flex-col items-center gap-3 mb-6 shrink-0">
+              activeMode === 'BIBLE' && copyright ? (
+                <div className="flex-1 flex flex-col items-center justify-center min-h-0 px-[4%]">
+                  <div className="flex flex-col items-center gap-4 mb-10 shrink-0">
                     <h2
                       style={{
-                        fontSize: ss.refFontSize ? `${ss.refFontSize}px` : '36px',
-                        color: ss.refColor || '#d4d4d8',
-                        fontFamily: ss.fontFamily || 'system-ui',
+                        fontSize: `${bibleHeadingFontSize}px`,
+                        color: bibleHeadingFontColor,
                       }}
-                      className="font-semibold tracking-wider select-none leading-none"
+                      className="font-semibold tracking-[0.15em] select-none leading-none"
                     >
                       {copyright}
                     </h2>
-                    <div className="w-16 h-0.5 bg-orange-500/50 rounded-full" />
+                    <div className="w-20 h-[3px] bg-orange-500/60 rounded-full" />
                   </div>
-                )}
-                <AnimatePresence mode="popLayout">
-                  {renderTextContent()}
-                </AnimatePresence>
-              </motion.div>
+                  <motion.div
+                    ref={textFitRef}
+                    key={cleanText}
+                    data-base-font-size="6"
+                    data-fit-version={fitVersion}
+                    variants={variants}
+                    initial={variants.initial}
+                    animate={variants.animate}
+                    exit={variants.exit}
+                    transition={{ duration, ease: easeCurve as any }}
+                    className="w-full flex items-center justify-center"
+                    style={{
+                      fontSize: `${bibleVerseFontSize}px`,
+                      color: bibleVerseFontColor,
+                      fontFamily: ss.fontFamily || 'system-ui',
+                      lineHeight: 1.3,
+                      textAlign: 'center',
+                      letterSpacing: '0.02em',
+                      textShadow: ss.shadowEnabled
+                        ? `${ss.shadowX ?? 2}px ${ss.shadowY ?? 2}px ${ss.shadowBlur ?? 4}px ${ss.shadowColor || '#000000'}`
+                        : 'none',
+                      WebkitTextStroke: ss.strokeEnabled
+                        ? `${ss.strokeWidth ?? 2}px ${ss.strokeColor || '#000000'}`
+                        : 'none',
+                    }}
+                  >
+                    <div className="max-w-[90%] leading-[1.4] font-medium break-words whitespace-pre-wrap text-center">
+                      {cleanText}
+                    </div>
+                  </motion.div>
+                </div>
+              ) : (
+                <motion.div 
+                  className="flex-1 flex items-center justify-center min-h-0"
+                  {...loopProps}
+                >
+                  <AnimatePresence mode="popLayout">
+                    {renderTextContent()}
+                  </AnimatePresence>
+                </motion.div>
+              )
             )}
 
             {/* 3. LOWER THIRD LYRICS BAND OVERLAY WITH CUSTOM BAR BACKING AND POSITION */}

@@ -190,11 +190,13 @@ export default function App() {
   const projectionPacket = useMemo(() => ({
     text: isBlackout ? "" : isTextCleared ? "" : (activeSlide ? activeSlide.text : ""),
     isBlackout, isTextCleared, isLowerThird,
+    activeMode,
     copyright: activeMode === "BIBLE" ? bibleReferenceText : (isDisplayingText && activePresentation?.copyright ? activePresentation.copyright : ""),
     bibleDescPosition: activeMode === "BIBLE" ? bibleDescPosition : "bottom_separate",
-    bibleVerseFontSize, bibleVerseFontColor, bibleHeadingFontSize, bibleHeadingFontColor,
+    bibleVerseFontSize, bibleVerseFontColor, bibleVerseBgColor, bibleVerseBgOpacity,
+    bibleHeadingFontSize, bibleHeadingFontColor, bibleHeadingBgColor, bibleHeadingBgOpacity,
     liveCaptionText,
-  }), [activeSlide, isBlackout, isTextCleared, isLowerThird, activePresentation, isDisplayingText, activeMode, bibleReferenceText, bibleDescPosition, bibleVerseFontSize, bibleVerseFontColor, bibleHeadingFontSize, bibleHeadingFontColor, liveCaptionText]);
+  }), [activeSlide, isBlackout, isTextCleared, isLowerThird, activePresentation, isDisplayingText, activeMode, bibleReferenceText, bibleDescPosition, bibleVerseFontSize, bibleVerseFontColor, bibleVerseBgColor, bibleVerseBgOpacity, bibleHeadingFontSize, bibleHeadingFontColor, bibleHeadingBgColor, bibleHeadingBgOpacity, liveCaptionText]);
 
   useEffect(() => {
     safeSaveLocalStorage("lyrics_last_projection_packet", JSON.stringify(projectionPacket));
