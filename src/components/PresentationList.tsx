@@ -443,6 +443,16 @@ export default function PresentationList({
     return result;
   }, [presentations, searchQuery, sortBy]);
 
+  const highlightTitle = (title: string) => {
+    if (!searchQuery) return title;
+    const idx = title.toLowerCase().indexOf(searchQuery.toLowerCase());
+    if (idx === -1) return title;
+    const before = title.slice(0, idx);
+    const match = title.slice(idx, idx + searchQuery.length);
+    const after = title.slice(idx + searchQuery.length);
+    return <>{before}<span className="text-orange-400 font-extrabold">{match}</span>{after}</>;
+  };
+
   const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
     const target = e.currentTarget;
     if (target.scrollHeight - target.scrollTop <= target.clientHeight + 100) {
@@ -751,7 +761,7 @@ export default function PresentationList({
                     ) : (
                       <div className="min-w-0 flex-1">
                         <p className={`text-[11px] whitespace-normal break-words leading-tight tracking-wide ${isActive ? 'text-zinc-100 font-bold' : 'text-zinc-400'}`}>
-                          {p.title}
+                          {highlightTitle(p.title)}
                         </p>
                         <span className="text-[8px] font-mono text-zinc-500 uppercase tracking-widest block mt-0.5">
                           {p.slides.length} slides
