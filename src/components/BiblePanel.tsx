@@ -511,7 +511,6 @@ export async function parseBibleXML(xmlString: string, onProgress: (progress: nu
 interface VerseItemProps {
   num: number;
   primaryText: string;
-  refText: string;
   isActive: boolean;
   onClick: () => void;
   itemRef?: React.Ref<HTMLDivElement>;
@@ -522,7 +521,6 @@ interface VerseItemProps {
 const VerseItem = React.memo(function VerseItem({
   num,
   primaryText,
-  refText,
   isActive,
   onClick,
   itemRef,
@@ -552,19 +550,12 @@ const VerseItem = React.memo(function VerseItem({
       }`}>
         {num}
       </div>
-      <div className="flex-1 flex flex-col gap-2 pr-1 min-w-0 h-auto overflow-visible">
+      <div className="flex-1 flex flex-col pr-1 min-w-0 h-auto overflow-visible">
         <span className={`text-[13px] leading-relaxed break-words whitespace-normal font-sans transition-all block ${
           isActive ? 'text-white font-medium tracking-wide' : 'text-zinc-300'
         }`}>
           {primaryText}
         </span>
-        {refText && (
-          <span className={`text-[11px] leading-normal font-sans italic border-t pt-2 transition-all break-words whitespace-normal block ${
-            isActive ? 'border-zinc-850 text-zinc-405' : 'border-zinc-800/40 text-zinc-500'
-          }`}>
-            {refText}
-          </span>
-        )}
       </div>
 
       {onToggleSave && (
@@ -809,9 +800,9 @@ export default function BiblePanel({
   const [descPosition, setDescPosition] = useState<string>(() => localStorage.getItem('bible_desc_position') || 'top_separate');
   const [descShowVersion, setDescShowVersion] = useState<boolean>(() => {
     const val = localStorage.getItem('bible_desc_show_version');
-    return val === null ? true : val === 'true';
+    return val === null ? false : val === 'true';
   });
-  const [descAlignment, setDescAlignment] = useState<string>(() => localStorage.getItem('bible_desc_alignment') || 'inherited');
+  const [descAlignment, setDescAlignment] = useState<string>(() => localStorage.getItem('bible_desc_alignment') || 'center');
   const [descLineHeight, setDescLineHeight] = useState<number>(() => {
     const val = localStorage.getItem('bible_desc_line_height');
     return val ? parseInt(val, 10) : 8;
@@ -980,10 +971,19 @@ export default function BiblePanel({
     // 4. Implement strict pagination rules (Prevent text shrinking, max 30 words per slide, split on grammatical breaks with top-anchored reference)
     const getWordCount = (s: string) => s.trim().split(/\s+/).filter(Boolean).length;
 
-    const combinedText = finalRef ? `${finalPrimary}\n${finalRef}` : finalPrimary;
+    // Build text with reference label prepended for a clean TV presentation
+    let combinedText = finalRef ? `${finalPrimary}\n${finalRef}` : finalPrimary;
+    if (formattedRef && effectivePosition !== 'hidden') {
+      if (effectivePosition === 'top_separate') {
+        combinedText = `${formattedRef}\n\n${combinedText}`;
+      } else if (effectivePosition === 'bottom_separate') {
+        combinedText = `${combinedText}\n\n${formattedRef}`;
+      }
+    }
+    const emptyLabel = '';
 
     if (!biblePaginationEnabled) {
-      return { text: `[Slide 1]\n${combinedText}`, label: formattedRef, descPosition: effectivePosition };
+      return { text: `[Slide 1]\n${combinedText}`, label: emptyLabel, descPosition: 'hidden' };
     }
 
     // Split text into segments based on punctuation and coordinate conjunctions to find logical grammatical breaks
@@ -1691,12 +1691,11 @@ export default function BiblePanel({
         {/* Verse Items List Body [Scrollable] */}
         <div className="flex-1 overflow-y-auto p-2.5 space-y-2 custom-scrollbar bg-neutral-950/60">
           {versesList.map((verse) => (
-            <VerseItem
-              key={verse.num}
-              num={verse.num}
-              primaryText={verse.primaryText}
-              refText={verse.refText}
-              isActive={activeVerse === verse.num}
+              <VerseItem
+                key={verse.num}
+                num={verse.num}
+                primaryText={verse.primaryText}
+                isActive={activeVerse === verse.num}
               onClick={() => handleTriggerProjectVerse(verse.num)}
               itemRef={activeVerse === verse.num ? activeItemRef : undefined}
               isSaved={isVerseSavedMap.has(verse.num)}

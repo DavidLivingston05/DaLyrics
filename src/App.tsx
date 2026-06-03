@@ -121,11 +121,11 @@ export default function App() {
   const [bibleDescLineHeight, setBibleDescLineHeight] = useState(() => { const v = localStorage.getItem("bible_desc_line_height"); return v ? parseInt(v, 10) : 8; });
   const [bibleDescPosition, setBibleDescPosition] = useState(() => localStorage.getItem("bible_desc_position") || "top_separate");
   const [biblePaginationEnabled, setBiblePaginationEnabled] = useState(() => localStorage.getItem("bible_pagination_enabled") === "true");
-  const [bibleHeadingFontSize, setBibleHeadingFontSize] = useState(() => { const s = localStorage.getItem("bible_heading_font_size"); return s ? Number(s) : 24; });
+  const [bibleHeadingFontSize, setBibleHeadingFontSize] = useState(() => { const s = localStorage.getItem("bible_heading_font_size"); return s ? Number(s) : 36; });
   const [bibleHeadingFontColor, setBibleHeadingFontColor] = useState(() => localStorage.getItem("bible_heading_font_color") || "#ffffff");
   const [bibleHeadingBgColor, setBibleHeadingBgColor] = useState(() => localStorage.getItem("bible_heading_bg_color") || "#0a0a0a");
   const [bibleHeadingBgOpacity, setBibleHeadingBgOpacity] = useState(() => { const s = localStorage.getItem("bible_heading_bg_opacity"); return s !== null ? Number(s) : 60; });
-  const [bibleVerseFontSize, setBibleVerseFontSize] = useState(() => { const s = localStorage.getItem("bible_verse_font_size"); return s ? Number(s) : 48; });
+  const [bibleVerseFontSize, setBibleVerseFontSize] = useState(() => { const s = localStorage.getItem("bible_verse_font_size"); return s ? Number(s) : 56; });
   const [bibleVerseFontColor, setBibleVerseFontColor] = useState(() => localStorage.getItem("bible_verse_font_color") || "#fac105");
   const [bibleVerseBgColor, setBibleVerseBgColor] = useState(() => localStorage.getItem("bible_verse_bg_color") || "#050505");
   const [bibleVerseBgOpacity, setBibleVerseBgOpacity] = useState(() => { const s = localStorage.getItem("bible_verse_bg_opacity"); return s !== null ? Number(s) : 0; });
