@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { Presentation } from '../types';
 import { Plus, Trash2, Edit2, Check, Music, Search, Sparkles, Upload, FileText } from 'lucide-react';
+import { transliterateToEnglish } from '../lib/transliterate';
 
 const parseTextToPresentations = (
   text: string,
@@ -422,13 +423,12 @@ export default function PresentationList({
 
   const fuzzyMatch = (text: string, query: string): boolean => {
     if (!query) return true;
+    if (!text) return false;
     const t = text.toLowerCase().normalize('NFC');
     const q = query.toLowerCase().normalize('NFC');
 
-    // Exact substring match
     if (t.includes(q)) return true;
 
-    // Character-order fuzzy match
     let qi = 0;
     for (let i = 0; i < t.length && qi < q.length; i++) {
       if (t[i] === q[qi]) qi++;
@@ -438,21 +438,29 @@ export default function PresentationList({
     return false;
   };
 
-  const highlightTitle = (title: string) => {
-    if (!searchQuery) return title;
-    const t = title.toLowerCase().normalize('NFC');
-    const q = searchQuery.toLowerCase().normalize('NFC');
-    const idx = t.indexOf(q);
-    if (idx === -1) return title;
-    const before = title.slice(0, idx);
-    const match = title.slice(idx, idx + searchQuery.length);
-    const after = title.slice(idx + searchQuery.length);
-    return <>{before}<span className="text-orange-400 font-extrabold">{match}</span>{after}</>;
+  const anyFieldMatches = (presentation: Presentation, query: string): { match: boolean; preview: string } => {
+    const q = query.trim();
+    if (!q) return { match: true, preview: '' };
+
+    // Check title (original + transliterated)
+    if (fuzzyMatch(presentation.title, q)) return { match: true, preview: '' };
+    if (fuzzyMatch(transliterateToEnglish(presentation.title), q)) return { match: true, preview: '' };
+
+    // Check lyrics
+    for (const slide of presentation.slides) {
+      for (const line of slide.text.split('\n')) {
+        if (!line.trim()) continue;
+        if (fuzzyMatch(line, q)) return { match: true, preview: line.trim().slice(0, 80) };
+        if (fuzzyMatch(transliterateToEnglish(line), q)) return { match: true, preview: line.trim().slice(0, 80) };
+      }
+    }
+
+    return { match: false, preview: '' };
   };
 
   const filteredPresentations = useMemo(() => {
     let result = presentations.filter((p) =>
-      fuzzyMatch(p.title, searchQuery)
+      anyFieldMatches(p, searchQuery).match
     );
 
     if (sortBy === 'alphabetical') {
@@ -472,6 +480,39 @@ export default function PresentationList({
 
     return result;
   }, [presentations, searchQuery, sortBy]);
+
+  const matchPreviews = useMemo(() => {
+    if (!searchQuery.trim()) return {} as Record<string, string>;
+    const map: Record<string, string> = {};
+    for (const p of presentations) {
+      const r = anyFieldMatches(p, searchQuery);
+      if (r.preview) map[p.id] = r.preview;
+    }
+    return map;
+  }, [presentations, searchQuery]);
+
+  const highlightText = (text: string) => {
+    if (!searchQuery || !text) return text;
+    const t = text.toLowerCase().normalize('NFC');
+    const q = searchQuery.toLowerCase().normalize('NFC');
+    const idx = t.indexOf(q);
+    if (idx !== -1) {
+      const before = text.slice(0, idx);
+      const match = text.slice(idx, idx + searchQuery.length);
+      const after = text.slice(idx + searchQuery.length);
+      return <>{before}<span className="text-orange-400 font-extrabold">{match}</span>{after}</>;
+    }
+    // Try transliterated match
+    const romanized = transliterateToEnglish(text).toLowerCase();
+    const ri = romanized.indexOf(q);
+    if (ri !== -1) {
+      const before = text.slice(0, ri);
+      const match = text.slice(ri, ri + searchQuery.length);
+      const after = text.slice(ri + searchQuery.length);
+      return <>{before}<span className="text-orange-400 font-extrabold">{match}</span>{after}</>;
+    }
+    return text;
+  };
 
   const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
     const target = e.currentTarget;
@@ -781,11 +822,16 @@ export default function PresentationList({
                     ) : (
                       <div className="min-w-0 flex-1">
                         <p className={`text-[11px] whitespace-normal break-words leading-tight tracking-wide ${isActive ? 'text-zinc-100 font-bold' : 'text-zinc-400'}`}>
-                          {highlightTitle(p.title)}
+                          {highlightText(p.title)}
                         </p>
                         <span className="text-[8px] font-mono text-zinc-500 uppercase tracking-widest block mt-0.5">
                           {p.slides.length} slides
                         </span>
+                        {matchPreviews[p.id] && (
+                          <p className="text-[9px] text-zinc-400 italic leading-tight mt-1 truncate">
+                            {highlightText(matchPreviews[p.id])}
+                          </p>
+                        )}
                       </div>
                     )}
                   </div>
