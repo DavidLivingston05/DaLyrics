@@ -1,20 +1,32 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://ai.google.dev/static/site-assets/images/share-ais-513315318.png" />
-</div>
+# DaLyric
 
-# Run and deploy your AI Studio app
+Church lyrics presentation app for song slides, Bible projection, and live stage display.
 
-This contains everything you need to run your app locally.
+## Features
 
-View your app in AI Studio: https://ai.studio/apps/40debcf9-b4d7-4a7b-9384-8497b0196187
+- **Song Library** — Import, edit, and organize songs. Bulk import from plain text files.
+- **Slide Editor** — Create and arrange slide decks with plain text or visual grid mode.
+- **Bible Browser** — Browse/search scripture with support for custom XML Bible translations.
+- **Fullscreen Projection** — Display songs and Bible verses on an external screen or projector.
+- **Live Preview / Stage Display** — Monitor what's being projected in real time.
+- **Mobile Remote** — Control presentations from your phone via WebSocket pairing.
+- **Setlist / Service Queue** — Order songs for a service and advance through them.
 
-## Run Locally
+## Getting Started
 
-**Prerequisites:**  Node.js
+```
+npm install
+npm run vite:dev
+```
 
+Open http://localhost:3000 in your browser.
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+For the desktop app with projection window:
+
+```
+npm run dev
+```
+
+## Tech Stack
+
+React 19, TypeScript, Vite 6, Tailwind CSS v4, Electron
