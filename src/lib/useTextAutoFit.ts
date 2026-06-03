@@ -1,62 +1,69 @@
 import { useLayoutEffect, useRef } from 'react';
 
-type Dispatch<T> = (value: T) => void;
 type MutableRefObject<T> = { current: T };
-type SetStateAction<S> = S | ((prevState: S) => S);
-
 
 export const useTextAutoFit = (
   textFitRef: MutableRefObject<HTMLElement | null>,
   fitScaleRef: MutableRefObject<number>,
-  setFitVersion: Dispatch<SetStateAction<number>>,
+  setFitVersion: (v: number | ((prev: number) => number)) => void,
   isLowerThird: boolean,
   text?: string
 ) => {
-  const guardRef = useRef(0);
+  const rafRef = useRef<number>(0);
 
   useLayoutEffect(() => {
+    if (isLowerThird) return;
+
     const el = textFitRef.current;
-    if (!el || isLowerThird) return;
+    if (!el) return;
 
-    // Measure the *actual* available height instead of bailing out when parent.clientHeight === 0.
-    // In flex layouts, the parent height may transiently be 0 during first layout.
     const parent = el.parentElement;
-    const host = parent || el;
+    if (!parent) return;
 
-    const hostRect = host.getBoundingClientRect();
-    const hostHeight = hostRect.height;
-    if (!hostHeight || hostHeight <= 0) return;
+    fitScaleRef.current = 1;
 
-    const cstyle = getComputedStyle(host);
-    const padV = (parseFloat(cstyle.paddingTop) || 0) + (parseFloat(cstyle.paddingBottom) || 0);
-    const contentHeight = hostHeight - padV;
-    if (contentHeight <= 0) return;
+    const doFit = () => {
+      const hostRect = parent.getBoundingClientRect();
+      const hostHeight = hostRect.height;
+      if (!hostHeight || hostHeight <= 0) return;
 
-    // scrollHeight is affected by current font-size; we adjust incrementally.
-    const textHeight = el.scrollHeight;
+      const cstyle = getComputedStyle(parent);
+      const padV = (parseFloat(cstyle.paddingTop) || 0) + (parseFloat(cstyle.paddingBottom) || 0);
+      const contentHeight = hostHeight - padV;
+      if (contentHeight <= 0) return;
 
+      const baseSize = parseFloat(el.dataset.baseFontSize || '1.4');
+      let scale = fitScaleRef.current;
 
-    const baseSize = parseFloat(el.dataset.baseFontSize || '1.4');
-    let changed = false;
+      el.style.fontSize = `${baseSize * scale}rem`;
+      const textHeight = el.scrollHeight;
 
-    if (textHeight > contentHeight + 2 && fitScaleRef.current > 0.05) {
-      const ratio = Math.max(0.05, (contentHeight / textHeight) * 0.95);
-      if (ratio < 0.995) {
-        fitScaleRef.current *= ratio;
-        changed = true;
+      if (textHeight > contentHeight + 2 && scale > 0.05) {
+        scale = Math.max(0.05, scale * (contentHeight / textHeight) * 0.95);
+        fitScaleRef.current = scale;
+        el.style.fontSize = `${baseSize * scale}rem`;
+
+        const newTextHeight = el.scrollHeight;
+        if (newTextHeight > contentHeight + 2 && scale > 0.05) {
+          scale = Math.max(0.05, scale * (contentHeight / newTextHeight) * 0.95);
+          fitScaleRef.current = scale;
+          el.style.fontSize = `${baseSize * scale}rem`;
+        }
+      } else if (textHeight * 1.15 < contentHeight && scale < 1) {
+        scale = 1;
+        fitScaleRef.current = 1;
+        el.style.fontSize = `${baseSize}rem`;
       }
-    } else if (textHeight * 1.15 < contentHeight && fitScaleRef.current < 1) {
-      fitScaleRef.current = 1;
-      changed = true;
-    }
 
-    if (changed) {
-      if (guardRef.current >= 15) { guardRef.current = 0; return; }
-      guardRef.current++;
-      el.style.fontSize = `${baseSize * fitScaleRef.current}rem`;
       setFitVersion(v => v + 1);
-    } else {
-      guardRef.current = 0;
-    }
+    };
+
+    rafRef.current = requestAnimationFrame(() => {
+      doFit();
+    });
+
+    return () => {
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    };
   }, [text, isLowerThird]);
 };

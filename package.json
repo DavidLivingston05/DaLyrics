@@ -12,7 +12,8 @@
     "clean": "rm -rf dist dist-electron",
     "lint": "tsc --noEmit",
     "electron:dev": "npm run dev",
-    "electron:build": "npm run build && electron-packager . DaLyric --platform=win32 --arch=x64 --out=release --overwrite"
+    "electron:build": "npm run build && electron-packager . DaLyric --platform=win32 --arch=x64 --out=release --overwrite",
+    "download-bible": "node scripts/download-bible.js"
   },
   "dependencies": {
     "@tsparticles/engine": "^4.1.0",

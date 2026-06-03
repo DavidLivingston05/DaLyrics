@@ -7,16 +7,8 @@ const STORE_NAME = 'presentations';
 export function initDB(): Promise<IDBDatabase> {
   return new Promise((resolve, reject) => {
     const request = indexedDB.open(DB_NAME, DB_VERSION);
-
-    request.onerror = (event) => {
-      console.error('IndexedDB open error:', event);
-      reject(new Error('Failed to open IndexedDB'));
-    };
-
-    request.onsuccess = (event) => {
-      resolve((event.target as IDBOpenDBRequest).result);
-    };
-
+    request.onerror = () => reject(new Error('Failed to open IndexedDB'));
+    request.onsuccess = (event) => resolve((event.target as IDBOpenDBRequest).result);
     request.onupgradeneeded = (event) => {
       const db = (event.target as IDBOpenDBRequest).result;
       if (!db.objectStoreNames.contains(STORE_NAME)) {
@@ -26,76 +18,76 @@ export function initDB(): Promise<IDBDatabase> {
   });
 }
 
-export async function savePresentations(presentations: Presentation[]): Promise<void> {
+export async function savePresentation(pres: Presentation): Promise<void> {
   const db = await initDB();
   return new Promise((resolve, reject) => {
-    const transaction = db.transaction(STORE_NAME, 'readwrite');
-    const store = transaction.objectStore(STORE_NAME);
-
-    // Clear all existing presentations to sync with the in-memory array perfectly
-    const clearRequest = store.clear();
-
-    clearRequest.onsuccess = () => {
-      if (presentations.length === 0) {
-        resolve();
-        return;
-      }
-
-      let activeRequestCount = 0;
-      let completedOrFailed = false;
-
-      for (const pres of presentations) {
-        const putRequest = store.put(pres);
-        activeRequestCount++;
-
-        putRequest.onsuccess = () => {
-          activeRequestCount--;
-          if (activeRequestCount === 0 && !completedOrFailed) {
-            resolve();
-          }
-        };
-
-        putRequest.onerror = (e) => {
-          console.error('Error saving presentation item in transaction:', e);
-          if (!completedOrFailed) {
-            completedOrFailed = true;
-            reject(new Error('Failed to save some presentations'));
-          }
-        };
-      }
-    };
-
-    clearRequest.onerror = (e) => {
-      console.error('Error clearing presentations object store:', e);
-      reject(e);
-    };
-
-    transaction.onerror = (e) => {
-      console.error('Transaction error in savePresentations:', e);
-    };
+    const tx = db.transaction(STORE_NAME, 'readwrite');
+    const store = tx.objectStore(STORE_NAME);
+    const req = store.put(pres);
+    req.onsuccess = () => resolve();
+    req.onerror = () => reject(req.error);
+    tx.onerror = () => reject(tx.error);
   });
+}
+
+export async function deletePresentation(id: string): Promise<void> {
+  const db = await initDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(STORE_NAME, 'readwrite');
+    const store = tx.objectStore(STORE_NAME);
+    const req = store.delete(id);
+    req.onsuccess = () => resolve();
+    req.onerror = () => reject(req.error);
+  });
+}
+
+export async function savePresentations(presentations: Presentation[]): Promise<void> {
+  if (presentations.length === 0) return;
+  const db = await initDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(STORE_NAME, 'readwrite');
+    const store = tx.objectStore(STORE_NAME);
+    let completed = 0;
+    for (const pres of presentations) {
+      const req = store.put(pres);
+      req.onsuccess = () => { completed++; if (completed === presentations.length) resolve(); };
+      req.onerror = () => reject(req.error);
+    }
+    tx.onerror = () => reject(tx.error);
+  });
+}
+
+export async function savePresentationsBulk(presentations: Presentation[]): Promise<void> {
+  return savePresentations(presentations);
 }
 
 export async function getPresentations(): Promise<Presentation[]> {
   try {
     const db = await initDB();
     return new Promise((resolve, reject) => {
-      const transaction = db.transaction(STORE_NAME, 'readonly');
-      const store = transaction.objectStore(STORE_NAME);
+      const tx = db.transaction(STORE_NAME, 'readonly');
+      const store = tx.objectStore(STORE_NAME);
       const request = store.getAll();
-
-      request.onsuccess = () => {
-        resolve(request.result || []);
-      };
-
-      request.onerror = (event) => {
-        console.error('Error reading presentations from IndexedDB:', event);
-        reject(new Error('Failed to retrieve presentations'));
-      };
+      request.onsuccess = () => resolve(request.result || []);
+      request.onerror = () => reject(request.error);
     });
-  } catch (err) {
-    console.error('IndexedDB initialization failed, falling back to empty list:', err);
+  } catch {
     return [];
+  }
+}
+
+export async function getPresentation(id: string): Promise<Presentation | undefined> {
+  try {
+    const db = await initDB();
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(STORE_NAME, 'readonly');
+      const store = tx.objectStore(STORE_NAME);
+      const request = store.get(id);
+      request.onsuccess = () => resolve(request.result || undefined);
+      request.onerror = () => reject(request.error);
+    });
+  } catch {
+    return undefined;
   }
 }
 
@@ -111,11 +103,39 @@ export function initIndexedDB(): Promise<IDBDatabase> {
       };
       request.onsuccess = () => resolve(request.result);
       request.onerror = () => reject(request.error);
-    } catch (e) {
-      reject(e);
-    }
+    } catch (e) { reject(e); }
   });
 }
+
+export const saveBibleToDB = async (bible: OfflineBible): Promise<void> => {
+  try {
+    const db = await initIndexedDB();
+    const tx = db.transaction('bibles', 'readwrite');
+    const store = tx.objectStore('bibles');
+    store.put(bible);
+    return new Promise<void>((resolve, reject) => {
+      tx.oncomplete = () => resolve();
+      tx.onerror = () => reject(tx.error);
+    });
+  } catch (err) {
+    console.warn('Error saving bible to IndexedDB:', err);
+  }
+};
+
+export const deleteBibleFromDB = async (id: string): Promise<void> => {
+  try {
+    const db = await initIndexedDB();
+    const tx = db.transaction('bibles', 'readwrite');
+    const store = tx.objectStore('bibles');
+    store.delete(id);
+    return new Promise<void>((resolve, reject) => {
+      tx.oncomplete = () => resolve();
+      tx.onerror = () => reject(tx.error);
+    });
+  } catch (err) {
+    console.warn('Error deleting bible from IndexedDB:', err);
+  }
+};
 
 export async function loadBiblesFromDB(): Promise<OfflineBible[]> {
   try {
@@ -132,5 +152,3 @@ export async function loadBiblesFromDB(): Promise<OfflineBible[]> {
     return [];
   }
 }
-
-

@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { useTextAutoFit } from '../lib/useTextAutoFit';
 import BackgroundRenderer from './Output/BackgroundRenderer';
 import DimOverlay from './Output/DimOverlay';
+import CountdownOverlay from './Output/CountdownOverlay';
 
 export default function FullscreenProjection() {
   const textFitRef = useRef<HTMLParagraphElement>(null);
@@ -28,6 +29,7 @@ export default function FullscreenProjection() {
     bibleVerseBgColor = '#000000', bibleVerseBgOpacity = 40,
     bibleHeadingFontSize = 36, bibleHeadingFontColor = '#d4d4d8',
     bibleHeadingBgColor = '#000000', bibleHeadingBgOpacity = 40,
+    countdownActive = false, countdownDuration = 300, countdownStartTime = 0,
   } = packet;
   const ss = styleSettings || {};
 
@@ -70,26 +72,6 @@ export default function FullscreenProjection() {
     window.addEventListener('storage', onStorage);
 
     return () => { bc.close(); window.removeEventListener('storage', onStorage); };
-  }, []);
-
-  // Final fallback: poll localStorage every 600ms in case BroadcastChannel + storage events
-  // are unreliable (Electron has known issues with cross-window BroadcastChannel)
-  useEffect(() => {
-    const interval = setInterval(() => {
-      const saved = localStorage.getItem('lyrics_last_projection_packet');
-      if (saved) {
-        try {
-          const parsed = JSON.parse(saved);
-          setPacket(prev => {
-            if (JSON.stringify(prev) !== JSON.stringify(parsed)) {
-              return parsed;
-            }
-            return prev;
-          });
-        } catch {}
-      }
-    }, 600);
-    return () => clearInterval(interval);
   }, []);
 
   // Keyboard navigation & close controls directly on the TV Screen.
@@ -439,6 +421,9 @@ export default function FullscreenProjection() {
 
         {/* Dim Overlay for text readability */}
         <DimOverlay opacity={ss?.dimOverlay ?? 0} />
+
+        {/* Countdown overlay */}
+        <CountdownOverlay active={countdownActive} startTime={countdownStartTime} duration={countdownDuration} />
 
         {!isBlackout ? (
           <div className="relative z-10 w-full h-full flex flex-col p-[2%]">

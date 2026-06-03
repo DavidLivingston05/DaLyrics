@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
 import { Presentation, Slide } from '../types';
+import { useBibleStyle } from '../contexts/BibleStyleContext';
 import { Radio, Tv, Trash2, ListMusic, ArrowRight, History, Star } from 'lucide-react';
 
 interface LiveMonitorProps {
@@ -23,66 +24,8 @@ interface LiveMonitorProps {
   fontSize: number;
   onProjectToTV: () => void;
 
-  // Custom typography states for rendering live preview perfectly!
-  fontFamily: string;
-  customGoogleFont: string;
-  fontColor: string;
-  textAlignment: 'center' | 'left' | 'right';
-  fontStyle: 'normal' | 'italic';
-  fontWeight: 'normal' | 'medium' | 'bold' | 'black';
-  lineHeight: 'compact' | 'normal' | 'loose';
-  letterSpacing: 'normal' | 'wide' | 'widest';
-  textShadow: boolean;
-  overlayOpacity: number;
-  overlayColor: string;
-
-  // Expanded Adjustable parameters
-  letterSpacingPx: number;
-  lineHeightVal: number;
-  textShadowX: number;
-  textShadowY: number;
-  textShadowBlur: number;
-  textShadowColor: string;
-  textStrokeWidth: number;
-  textStrokeColor: string;
-  allCapsEnabled: boolean;
-  titleCasingEnabled: boolean;
-  safeMarginTop: number;
-  safeMarginBottom: number;
-  safeMarginLeft: number;
-  safeMarginRight: number;
-  verticalAlignment: 'top' | 'middle' | 'bottom';
-  textGradientEnabled: boolean;
-  textGradientStart: string;
-  textGradientEnd: string;
-  textGradientDirection: string;
-  highlightWordsEnabled: boolean;
-  highlightWordsList: string;
-  highlightWordsColor: string;
   bibleDescPosition?: string;
   activeMode: string;
-
-  // ProPresenter preview state variables
-  textScalingMode: 'fit' | 'fill' | 'none';
-  textBgFill: 'none' | 'solid' | 'gradient';
-  textBgFillColor: string;
-  textBgFillOpacity: number;
-  textBgFillGradientStart: string;
-  textBgFillGradientEnd: string;
-  textBgFillPadding: number;
-  textBgFillBorderRadius: number;
-  textShadowAngle: number;
-  textShadowDistance: number;
-  textShadowOpacity: number;
-  textOutlineDouble: boolean;
-  bibleHeadingFontSize: number;
-  bibleHeadingFontColor: string;
-  bibleHeadingBgColor: string;
-  bibleHeadingBgOpacity: number;
-  bibleVerseFontSize: number;
-  bibleVerseFontColor: string;
-  bibleVerseBgColor: string;
-  bibleVerseBgOpacity: number;
 
   // Setlist parameters
   setlist?: { uniqueId: string; presentationId: string; title: string }[];
@@ -103,73 +46,16 @@ export default function LiveMonitor({
   onToggleClearText,
   isBlackout,
   onToggleBlackout,
-  theme,
-  customBgImage,
-  customBgVideo,
-  customSolidBgColor,
+  theme = 'stage',
+  customBgImage = null,
+  customBgVideo = null,
+  customSolidBgColor = '#0a0a0a',
   isLowerThird,
   onToggleLowerThird,
-  fontSize,
+  fontSize = 4.2,
   onProjectToTV,
-  fontFamily,
-  customGoogleFont,
-  fontColor,
-  textAlignment,
-  fontStyle,
-  fontWeight,
-  lineHeight,
-  letterSpacing,
-  textShadow,
-  overlayOpacity,
-  overlayColor,
   bibleDescPosition = 'top_separate',
-
-  // Extra customizable properties
-  letterSpacingPx,
-  lineHeightVal,
-  textShadowX,
-  textShadowY,
-  textShadowBlur,
-  textShadowColor,
-  textStrokeWidth,
-  textStrokeColor,
-  allCapsEnabled,
-  titleCasingEnabled,
-  safeMarginTop,
-  safeMarginBottom,
-  safeMarginLeft,
-  safeMarginRight,
-  verticalAlignment,
-  textGradientEnabled,
-  textGradientStart,
-  textGradientEnd,
-  textGradientDirection,
-  highlightWordsEnabled,
-  highlightWordsList,
-  highlightWordsColor,
-  activeMode,
-
-  // Custom ProPresenter preview states
-  textScalingMode,
-  textBgFill,
-  textBgFillColor,
-  textBgFillOpacity,
-  textBgFillGradientStart,
-  textBgFillGradientEnd,
-  textBgFillPadding,
-  textBgFillBorderRadius,
-  textShadowAngle,
-  textShadowDistance,
-  textShadowOpacity,
-  textOutlineDouble,
-  bibleHeadingFontSize,
-  bibleHeadingFontColor,
-  bibleHeadingBgColor,
-  bibleHeadingBgOpacity,
-  bibleVerseFontSize,
-  bibleVerseFontColor,
-  bibleVerseBgColor,
-  bibleVerseBgOpacity,
+  activeMode = 'SONGS',
 
   // Setlist props
   setlist = [],
@@ -184,6 +70,55 @@ export default function LiveMonitor({
 }: LiveMonitorProps) {
 
   const [bibleHubTab, setBibleHubTab] = React.useState<'history' | 'saved'>('history');
+
+  const bs = useBibleStyle();
+
+  const fontFamily: string = 'Inter';
+  const customGoogleFont: string = '';
+  const fontColor: string = '#fac105';
+  const textAlignment = 'center' as 'center' | 'left' | 'right';
+  const fontStyle: string = 'normal';
+  const fontWeight = 'black' as 'normal' | 'medium' | 'bold' | 'black';
+  const lineHeight: string = 'normal';
+  const letterSpacing: string = 'wide';
+  const textShadow: boolean = true;
+  const overlayOpacity: number = 0;
+  const overlayColor: string = '#000000';
+  const letterSpacingPx: number = 2;
+  const lineHeightVal: number = 1.30;
+  const textShadowX: number = 0;
+  const textShadowY: number = 4;
+  const textShadowBlur: number = 16;
+  const textShadowColor: string = '#000000';
+  const textStrokeWidth: number = 0;
+  const textStrokeColor: string = '#000000';
+  const allCapsEnabled: boolean = false;
+  const titleCasingEnabled: boolean = false;
+  const safeMarginTop: number = 4;
+  const safeMarginBottom: number = 4;
+  const safeMarginLeft: number = 4;
+  const safeMarginRight: number = 4;
+  const verticalAlignment = 'middle' as 'top' | 'middle' | 'bottom';
+  const textGradientEnabled: boolean = false;
+  const textGradientStart: string = '#ffa500';
+  const textGradientEnd: string = '#ff0055';
+  const textGradientDirection: string = 'to bottom';
+  const highlightWordsEnabled: boolean = false;
+  const highlightWordsList: string = 'Jesus, God, Lord, Christ, Yahweh, Holy Spirit, Amen, Saviour';
+  const highlightWordsColor: string = '#ffeb3b';
+  const textScalingMode: 'fit' | 'fill' | 'none' = 'fit';
+  const textBgFill: 'none' | 'solid' | 'gradient' = 'none';
+  const textBgFillColor: string = '#000000';
+  const textBgFillOpacity: number = 60;
+  const textBgFillGradientStart: string = '#000000';
+  const textBgFillGradientEnd: string = '#1a1a1a';
+  const textBgFillPadding: number = 12;
+  const textBgFillBorderRadius: number = 8;
+  const textShadowAngle: number = 135;
+  const textShadowDistance: number = 4;
+  const textShadowOpacity: number = 90;
+  const textOutlineDouble: boolean = false;
+  const bibleVerseFontSize: number = bs.bibleVerseFontSize;
 
   const activeSlide: Slide | null = useMemo(() => {
     if (activePresentation && activeSlideIndex !== null) {
@@ -319,8 +254,8 @@ export default function LiveMonitor({
     }
 
     // Color customization
-    if (activeMode === 'BIBLE' && bibleVerseFontColor) {
-      style.color = bibleVerseFontColor;
+    if (activeMode === 'BIBLE' && bs.bibleVerseFontColor) {
+      style.color = bs.bibleVerseFontColor;
     } else if (fontColor) {
       style.color = fontColor;
     }
@@ -459,16 +394,16 @@ export default function LiveMonitor({
 
   const getPreviewOverlayStyle = (): React.CSSProperties => {
     if (activeMode === 'BIBLE') {
-      const hex = (bibleVerseBgColor && bibleVerseBgColor.startsWith('#')) ? bibleVerseBgColor.replace('#', '') : '000000';
+      const hex = (bs.bibleVerseBgColor && bs.bibleVerseBgColor.startsWith('#')) ? bs.bibleVerseBgColor.replace('#', '') : '000000';
       const r = parseInt(hex.substring(0, 2), 16);
       const g = parseInt(hex.substring(2, 4), 16);
       const b = parseInt(hex.substring(4, 6), 16);
       const rgbColor = (!isNaN(r) && !isNaN(g) && !isNaN(b)) ? `${r}, ${g}, ${b}` : '0, 0, 0';
       return {
-        backgroundColor: `rgba(${rgbColor}, ${(bibleVerseBgOpacity ?? 0) / 100})`,
+        backgroundColor: `rgba(${rgbColor}, ${(bs.bibleVerseBgOpacity ?? 0) / 100})`,
         padding: '0.4rem 0.8rem',
         borderRadius: '0.5rem',
-        border: (bibleVerseBgOpacity ?? 0) > 0 ? '1px solid rgba(255,255,255,0.06)' : 'none',
+        border: (bs.bibleVerseBgOpacity ?? 0) > 0 ? '1px solid rgba(255,255,255,0.06)' : 'none',
         width: '95%',
         margin: '0 auto'
       };
@@ -501,17 +436,17 @@ export default function LiveMonitor({
 
   const getPreviewHeadingStyle = (): React.CSSProperties => {
     if (activeMode === 'BIBLE') {
-      const hex = (bibleHeadingBgColor && bibleHeadingBgColor.startsWith('#')) ? bibleHeadingBgColor.replace('#', '') : '101010';
+      const hex = (bs.bibleHeadingBgColor && bs.bibleHeadingBgColor.startsWith('#')) ? bs.bibleHeadingBgColor.replace('#', '') : '101010';
       const r = parseInt(hex.substring(0, 2), 16);
       const g = parseInt(hex.substring(2, 4), 16);
       const b = parseInt(hex.substring(4, 6), 16);
       const rgbColor = (!isNaN(r) && !isNaN(g) && !isNaN(b)) ? `${r}, ${g}, ${b}` : '10, 10, 10';
 
       return {
-        fontSize: `${bibleHeadingFontSize * 0.045}rem`,
-        color: bibleHeadingFontColor || '#ffffff',
-        backgroundColor: `rgba(${rgbColor}, ${(bibleHeadingBgOpacity ?? 60) / 100})`,
-        border: (bibleHeadingBgOpacity ?? 0) > 0 ? '1px solid rgba(255,255,255,0.08)' : 'none',
+        fontSize: `${bs.bibleHeadingFontSize * 0.045}rem`,
+        color: bs.bibleHeadingFontColor || '#ffffff',
+        backgroundColor: `rgba(${rgbColor}, ${(bs.bibleHeadingBgOpacity ?? 60) / 100})`,
+        border: (bs.bibleHeadingBgOpacity ?? 0) > 0 ? '1px solid rgba(255,255,255,0.08)' : 'none',
       };
     }
     return {};
