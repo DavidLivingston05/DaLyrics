@@ -48,10 +48,7 @@ export default function LiveMonitor({
   const isDisplayingText = activeSlide && !isTextCleared && !isBlackout;
   const activeText = isDisplayingText ? activeSlide!.text : '';
 
-  const copyright = (() => {
-    if (activeMode !== 'BIBLE' || !activePresentation?.copyright) return '';
-    return activePresentation.copyright;
-  })();
+  const reference = activePresentation?.copyright || '';
 
   const previewBibleOverlay = (): React.CSSProperties => {
     if (activeMode !== 'BIBLE' || !activeText) return {};
@@ -69,7 +66,7 @@ export default function LiveMonitor({
   };
 
   const previewHeading = (): React.CSSProperties => {
-    if (activeMode !== 'BIBLE' || !copyright) return {};
+    if (activeMode !== 'BIBLE' || !reference) return {};
     const hex = (bs.bibleHeadingBgColor || '#101010').replace('#', '');
     const r = parseInt(hex.substring(0, 2), 16);
     const g = parseInt(hex.substring(2, 4), 16);
@@ -138,9 +135,10 @@ export default function LiveMonitor({
             {isBlackout ? null : isTextCleared ? null : activeText ? (
               <div className="flex-1 flex flex-col items-center justify-center p-[3%] z-10">
                 {/* Heading */}
-                {copyright && bibleDescPosition === 'top_separate' && (
+                {/* Reference heading (top position) */}
+                {reference && activeMode === 'BIBLE' && bibleDescPosition === 'top_separate' && (
                   <span className="text-[7px] font-sans font-bold text-white bg-neutral-950/60 border border-white/10 px-2.5 py-1 rounded backdrop-blur-sm mb-2 inline-block" style={previewHeading()}>
-                    {copyright}
+                    {reference}
                   </span>
                 )}
 
@@ -158,15 +156,15 @@ export default function LiveMonitor({
                   </p>
                 </div>
 
-                {/* Footer heading */}
-                {copyright && (bibleDescPosition === 'bottom_separate' || (bibleDescPosition !== 'top_separate' && bibleDescPosition !== 'bottom_separate')) && (
-                  bibleDescPosition === 'bottom_separate' ? (
+                {/* Reference at bottom */}
+                {reference && (activeMode !== 'BIBLE' || bibleDescPosition !== 'top_separate') && (
+                  bibleDescPosition === 'bottom_separate' && activeMode === 'BIBLE' ? (
                     <span className="text-[7px] font-sans font-bold text-white bg-neutral-950/60 border border-white/10 px-2.5 py-1 rounded backdrop-blur-sm mt-2 inline-block" style={previewHeading()}>
-                      {copyright}
+                      {reference}
                     </span>
                   ) : (
                     <span className="text-[6px] font-mono text-zinc-500 uppercase tracking-widest absolute bottom-1">
-                      {copyright}
+                      {reference}
                     </span>
                   )
                 )}
