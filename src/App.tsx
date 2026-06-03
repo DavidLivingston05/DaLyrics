@@ -2,14 +2,14 @@ import React, { useState, useEffect, useMemo, useRef } from "react";
 import { Presentation, Slide } from "./types";
 import { INITIAL_PRESENTATIONS } from "./data";
 import PresentationList from "./components/PresentationList";
-import { getPresentations, savePresentations } from "./lib/db";
+import { getPresentations, savePresentations, savePresentationsBulk, loadBiblesFromDB, saveBibleToDB } from "./lib/db";
 import WorkspaceEditor from "./components/WorkspaceEditor";
 import FullscreenProjection from "./components/FullscreenProjection";
 import LiveMonitor from "./components/LiveMonitor";
-import BiblePanel from "./components/BiblePanel";
+import BiblePanel, { getBookInfo } from "./components/BiblePanel";
 import MobileRemote from "./components/MobileRemote";
 import { BibleStyleProvider, useBibleStyle } from "./contexts/BibleStyleContext";
-import { BookOpen, Music, Sparkles, Monitor, Play } from "lucide-react";
+import { BookOpen, Music, Sparkles, Monitor, Play, Search } from "lucide-react";
 
 export function safeSaveLocalStorage(key: string, value: string) {
   try { localStorage.setItem(key, value); }
@@ -113,6 +113,26 @@ function AppContent() {
   const [isLowerThird, setIsLowerThird] = useState(false);
   const [liveCaptionText, setLiveCaptionText] = useState("");
 
+  const [quickRef, setQuickRef] = useState("");
+  const quickRefRegex = /^\s*([1-3]\s*)?([a-zA-Z\u0B80-\u0BFF\s\.\u00a0]+?)\s*(\d+)(?:\s*[:\s-]\s*(\d+))?\s*$/i;
+  const handleQuickRefJump = () => {
+    const q = quickRef.trim();
+    if (!q) return;
+    const m = q.match(quickRefRegex);
+    if (!m) return;
+    const prefix = m[1] || '';
+    const bookName = (prefix + m[2]).trim();
+    const chapter = parseInt(m[3], 10);
+    const verse = m[4] ? parseInt(m[4], 10) : 1;
+    const book = getBookInfo(bookName);
+    if (!book || chapter < 1 || chapter > book.chaptersCount) return;
+    setBibleActiveBookId(book.id);
+    setBibleActiveChapter(chapter);
+    setBibleActiveVerse(verse);
+    setActiveMode("BIBLE");
+    setQuickRef("");
+  };
+
   const [activeMode, setActiveMode] = useState<"SONGS" | "BIBLE">("SONGS");
   const [bibleProjectionText, setBibleProjectionText] = useState<string | null>(null);
   const [bibleReferenceText, setBibleReferenceText] = useState("");
@@ -152,6 +172,32 @@ function AppContent() {
       countdownStartRef.current = Date.now();
       setCountdownActive(true);
     }
+  };
+
+  const importFileRef = useRef<HTMLInputElement>(null);
+  const handleExport = async () => {
+    const pres = await getPresentations();
+    const bibles = await loadBiblesFromDB();
+    const lsKeys = ['ultra_minimal_active_id','lyrics_setlist','bible_history','bible_saved_verses','library_sort_by','remote_pin','bible_primary_translation','bible_reference_translation','bible_desc_style','bible_desc_separator','bible_desc_position','bible_desc_show_version','bible_desc_alignment','bible_desc_line_height','bible_layout','bible_pagination_enabled','bible_heading_font_size','bible_heading_font_color','bible_heading_bg_color','bible_heading_bg_opacity','bible_verse_font_size','bible_verse_font_color','bible_verse_bg_color','bible_verse_bg_opacity','remote_paired_state','remote_pairing_pin'];
+    const ls: Record<string,string> = {};
+    lsKeys.forEach(k => { const v = localStorage.getItem(k); if (v !== null) ls[k] = v; });
+    const json = JSON.stringify({ version:1,exportedAt:new Date().toISOString(),presentations:pres,bibles:bibles,localStorage:ls }, null, 2);
+    const url = URL.createObjectURL(new Blob([json], { type:'application/json' }));
+    const a = document.createElement('a'); a.href = url; a.download = `dalyric-backup-${new Date().toISOString().slice(0,10)}.json`;
+    a.click(); URL.revokeObjectURL(url);
+  };
+  const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      const data = JSON.parse(await file.text());
+      if (!data.version || !data.presentations) throw new Error('Invalid backup');
+      if (data.presentations.length) await savePresentationsBulk(data.presentations);
+      if (data.bibles?.length) for (const b of data.bibles) await saveBibleToDB(b);
+      if (data.localStorage) Object.entries(data.localStorage).forEach(([k,v]) => { try { localStorage.setItem(k, v as string); } catch {} });
+      window.location.reload();
+    } catch (err) { alert('Import failed: ' + (err instanceof Error ? err.message : 'Unknown error')); }
+    e.target.value = '';
   };
   useEffect(() => {
     if (autoTimerRef.current) { clearInterval(autoTimerRef.current); autoTimerRef.current = null; }
@@ -400,10 +446,24 @@ function AppContent() {
           <button onClick={() => { setActiveMode("SONGS"); setBibleProjectionText(null); }} className={"px-4 py-1.5 flex items-center gap-1.5 text-[11px] font-display font-bold tracking-wider uppercase transition-all cursor-pointer " + (activeMode === "SONGS" ? "bg-gradient-to-r from-orange-500 to-amber-600 text-white rounded-lg shadow-md shadow-orange-950/40 font-extrabold border border-orange-450/20" : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/50 rounded-lg")}>Songs</button>
           <button onClick={() => setActiveMode("BIBLE")} className={"px-4 py-1.5 flex items-center gap-1.5 text-[11px] font-display font-bold tracking-wider uppercase transition-all cursor-pointer " + (activeMode === "BIBLE" ? "bg-gradient-to-r from-orange-500 to-amber-600 text-white rounded-lg shadow-md shadow-orange-950/40 font-extrabold border border-orange-450/20" : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/50 rounded-lg")}><BookOpen className="w-3.5 h-3.5 text-orange-200" />Bible</button>
         </div>
+        <div className="relative flex items-center">
+          <Search className="w-3.5 h-3.5 text-zinc-500 absolute left-2.5 pointer-events-none" />
+          <input
+            type="text"
+            value={quickRef}
+            onChange={e => setQuickRef(e.target.value)}
+            onKeyDown={e => { if (e.key === 'Enter') handleQuickRefJump(); if (e.key === 'Escape') setQuickRef(''); }}
+            placeholder="Gen 1:1 or ஆதி 1:1"
+            className="w-44 bg-zinc-900/60 hover:bg-zinc-900 focus:bg-zinc-950 border border-zinc-800 hover:border-zinc-700 focus:border-orange-500/60 rounded-xl px-2 py-1.5 pl-8 text-[11px] text-zinc-200 focus:outline-none font-sans placeholder-zinc-500 transition-all"
+          />
+        </div>
         <div className="text-[10px] font-mono text-zinc-500 flex items-center gap-2 font-bold">
           <button onClick={() => setIsLivePanelOpen(v => !v)} className={"px-3 py-1.5 flex items-center gap-1.5 text-[11px] font-display font-bold tracking-wider uppercase transition-all cursor-pointer rounded-xl border " + (isLivePanelOpen ? "bg-orange-500/20 text-orange-400 border-orange-500/40" : "bg-zinc-900/80 text-zinc-400 border-zinc-800/80 hover:text-zinc-200 hover:border-zinc-700")}><Monitor className="w-3.5 h-3.5" />{isLivePanelOpen ? "Live" : "Preview"}</button>
           <button onClick={() => setAutoAdvanceDelay(p => p === 0 ? 5000 : p === 5000 ? 10000 : p === 10000 ? 30000 : 0)} className={"px-2.5 py-1.5 flex items-center gap-1 text-[10px] font-display font-bold tracking-wider uppercase transition-all cursor-pointer rounded-xl border " + (autoAdvanceDelay > 0 ? "bg-green-500/20 text-green-400 border-green-500/40" : "bg-zinc-900/80 text-zinc-500 border-zinc-800/80 hover:text-zinc-400 hover:border-zinc-700")}><Play className={"w-3 h-3 " + (autoAdvanceDelay > 0 ? "fill-green-400" : "")} />{autoAdvanceDelay > 0 ? (autoAdvanceDelay / 1000) + "s" : "Auto"}</button>
           <button onClick={handleToggleCountdown} className={"px-2.5 py-1.5 flex items-center gap-1 text-[10px] font-display font-bold tracking-wider uppercase transition-all cursor-pointer rounded-xl border " + (countdownActive ? "bg-red-500/20 text-red-400 border-red-500/40 animate-pulse" : "bg-zinc-900/80 text-zinc-500 border-zinc-800/80 hover:text-zinc-400 hover:border-zinc-700")}>{countdownActive ? "Stop" : "Timer"}</button>
+          <button onClick={handleExport} className="px-2 py-1.5 bg-zinc-900/80 text-zinc-400 border border-zinc-800/80 hover:text-zinc-200 hover:border-zinc-700 rounded-xl transition-all text-[10px] font-display font-bold tracking-wider uppercase cursor-pointer" title="Export backup">📦</button>
+          <button onClick={() => importFileRef.current?.click()} className="px-2 py-1.5 bg-zinc-900/80 text-zinc-400 border border-zinc-800/80 hover:text-zinc-200 hover:border-zinc-700 rounded-xl transition-all text-[10px] font-display font-bold tracking-wider uppercase cursor-pointer" title="Import backup">📂</button>
+          <input ref={importFileRef} type="file" accept=".json" onChange={handleImport} className="hidden" />
           <span className="bg-zinc-900/80 text-orange-450 px-3 py-1.5 rounded-xl border border-zinc-800/80 font-black text-xs text-orange-400">{currentTime.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" })}</span>
         </div>
       </header>
