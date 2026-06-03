@@ -971,19 +971,10 @@ export default function BiblePanel({
     // 4. Implement strict pagination rules (Prevent text shrinking, max 30 words per slide, split on grammatical breaks with top-anchored reference)
     const getWordCount = (s: string) => s.trim().split(/\s+/).filter(Boolean).length;
 
-    // Build text with reference label prepended for a clean TV presentation
-    let combinedText = finalRef ? `${finalPrimary}\n${finalRef}` : finalPrimary;
-    if (formattedRef && effectivePosition !== 'hidden') {
-      if (effectivePosition === 'top_separate') {
-        combinedText = `${formattedRef}\n\n${combinedText}`;
-      } else if (effectivePosition === 'bottom_separate') {
-        combinedText = `${combinedText}\n\n${formattedRef}`;
-      }
-    }
-    const emptyLabel = '';
+    const combinedText = finalRef ? `${finalPrimary}\n${finalRef}` : finalPrimary;
 
     if (!biblePaginationEnabled) {
-      return { text: `[Slide 1]\n${combinedText}`, label: emptyLabel, descPosition: 'hidden' };
+      return { text: `[Slide 1]\n${combinedText}`, label: formattedRef, descPosition: effectivePosition };
     }
 
     // Split text into segments based on punctuation and coordinate conjunctions to find logical grammatical breaks

@@ -436,37 +436,27 @@ export default function FullscreenProjection() {
         {!isBlackout ? (
           <div className="relative z-10 w-full h-full flex flex-col p-[2%]">
             
-            {/* 1. DYNAMIC BIBLE REFERENCE OVERLAY */}
-            {!isTextCleared && text && copyright && activeMode === 'BIBLE' && ss.showRefLine !== false && (
-              <div 
-                className={`absolute z-35 transition-all duration-300 ${
-                  ss.refPosition === 'bottom-center' ? 'bottom-8 left-1/2 -translate-x-1/2' :
-                  ss.refPosition === 'bottom-right' ? 'bottom-8 right-8' :
-                  'top-8 left-8' // default: top-left
-                }`}
-              >
-                <div className={`flex flex-col ${ss.refPosition === 'bottom-center' ? 'items-center' : 'items-start'}`}>
-                  <h2
-                    style={{ 
-                      fontSize: ss.refFontSize ? `${ss.refFontSize}px` : '28px', 
-                      color: ss.refColor || '#a1a1aa',
-                      fontFamily: ss.fontFamily || 'system-ui'
-                    }}
-                    className="font-bold tracking-wide select-none leading-none"
-                  >
-                    {copyright}
-                  </h2>
-                  <div className="w-10 h-0.5 bg-orange-500/40 mt-1.5 rounded-full" />
-                </div>
-              </div>
-            )}
-
             {/* 2. FULLSCREEN CENTER LYRICS (Only when lower third is NOT active) */}
             {!isTextCleared && text && !(isLowerThird || ss.lowerThirdMode === 'lyrics') && ss.lowerThirdMode !== 'speaker' && ss.lowerThirdMode !== 'ticker' && (
               <motion.div 
-                className="flex-1 flex items-center justify-center min-h-0"
+                className="flex-1 flex flex-col items-center justify-center min-h-0"
                 {...loopProps}
               >
+                {activeMode === 'BIBLE' && copyright && (
+                  <div className="flex flex-col items-center gap-3 mb-6 shrink-0">
+                    <h2
+                      style={{
+                        fontSize: ss.refFontSize ? `${ss.refFontSize}px` : '36px',
+                        color: ss.refColor || '#d4d4d8',
+                        fontFamily: ss.fontFamily || 'system-ui',
+                      }}
+                      className="font-semibold tracking-wider select-none leading-none"
+                    >
+                      {copyright}
+                    </h2>
+                    <div className="w-16 h-0.5 bg-orange-500/50 rounded-full" />
+                  </div>
+                )}
                 <AnimatePresence mode="popLayout">
                   {renderTextContent()}
                 </AnimatePresence>
