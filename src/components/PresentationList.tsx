@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect, useCallback } from 'react';
+import React, { useState, useMemo, useEffect, useCallback, memo } from 'react';
 import { Presentation } from '../types';
 import { Plus, Trash2, Edit2, Check, Music, Search, Sparkles, Upload, FileText } from 'lucide-react';
 import { transliterateToEnglish } from '../lib/transliterate';
@@ -115,7 +115,7 @@ interface PresentationListProps {
   onDeleteMultiple?: (ids: string[]) => void;
 }
 
-export default function PresentationList({
+function PresentationList({
   presentations,
   activePresentationId,
   onSelect,
@@ -1351,3 +1351,5 @@ Let me hide myself in thee`);
     </div>
   );
 }
+
+export default memo(PresentationList);

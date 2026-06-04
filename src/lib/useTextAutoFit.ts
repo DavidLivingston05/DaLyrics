@@ -1,4 +1,4 @@
-import { useLayoutEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 
 type MutableRefObject<T> = { current: T };
 
@@ -10,8 +10,9 @@ export const useTextAutoFit = (
   text?: string
 ) => {
   const rafRef = useRef<number>(0);
+  const prevTextRef = useRef(text);
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     if (isLowerThird) return;
 
     const el = textFitRef.current;
@@ -20,9 +21,12 @@ export const useTextAutoFit = (
     const parent = el.parentElement;
     if (!parent) return;
 
+    if (text === prevTextRef.current) return;
+    prevTextRef.current = text;
+
     fitScaleRef.current = 1;
 
-    const doFit = () => {
+    rafRef.current = requestAnimationFrame(() => {
       const hostRect = parent.getBoundingClientRect();
       const hostHeight = hostRect.height;
       if (!hostHeight || hostHeight <= 0) return;
@@ -33,33 +37,23 @@ export const useTextAutoFit = (
       if (contentHeight <= 0) return;
 
       const baseSize = parseFloat(el.dataset.baseFontSize || '10');
-      let scale = fitScaleRef.current;
-
-      el.style.fontSize = `${baseSize * scale}rem`;
+      el.style.fontSize = `${baseSize}rem`;
       const textHeight = el.scrollHeight;
 
-      if (textHeight > contentHeight + 2 && scale > 0.05) {
-        scale = Math.max(0.05, scale * (contentHeight / textHeight) * 0.95);
+      if (textHeight > contentHeight + 2) {
+        const scale = Math.max(0.05, (contentHeight / textHeight) * 0.95);
         fitScaleRef.current = scale;
         el.style.fontSize = `${baseSize * scale}rem`;
 
         const newTextHeight = el.scrollHeight;
-        if (newTextHeight > contentHeight + 2 && scale > 0.05) {
-          scale = Math.max(0.05, scale * (contentHeight / newTextHeight) * 0.95);
-          fitScaleRef.current = scale;
-          el.style.fontSize = `${baseSize * scale}rem`;
+        if (newTextHeight > contentHeight + 2) {
+          const scale2 = Math.max(0.05, scale * (contentHeight / newTextHeight) * 0.95);
+          fitScaleRef.current = scale2;
+          el.style.fontSize = `${baseSize * scale2}rem`;
         }
-      } else if (textHeight * 1.15 < contentHeight && scale < 1) {
-        scale = 1;
-        fitScaleRef.current = 1;
-        el.style.fontSize = `${baseSize}rem`;
       }
 
       setFitVersion(v => v + 1);
-    };
-
-    rafRef.current = requestAnimationFrame(() => {
-      doFit();
     });
 
     return () => {

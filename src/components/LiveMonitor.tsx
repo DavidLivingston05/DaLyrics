@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, memo } from 'react';
 import { Presentation } from '../types';
 import { useBibleStyle } from '../contexts/BibleStyleContext';
 import { Tv, Trash2, ListMusic, ArrowRight, History, Star } from 'lucide-react';
@@ -24,7 +24,7 @@ interface LiveMonitorProps {
   onJumpToVerse?: (bookId: string, chapter: number, verse: number) => void;
 }
 
-export default function LiveMonitor({
+function LiveMonitor({
   activePresentation, activeSlideIndex,
   isTextCleared, onToggleClearText,
   isBlackout, onToggleBlackout,
@@ -311,3 +311,5 @@ export default function LiveMonitor({
     </div>
   );
 }
+
+export default memo(LiveMonitor);

@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect } from 'react';
+import { useMemo, useState, useEffect, memo } from 'react';
 import { Presentation, Slide, OfflineBible } from '../types';
 import { LayoutGrid, FileText, Tv, Check, Play, FileEdit, Info, Sliders, BookOpen } from 'lucide-react';
 import { loadBiblesFromDB } from '../lib/db';
@@ -13,7 +13,7 @@ interface WorkspaceEditorProps {
   liveCaptionText: string;
   onUpdateLiveCaptionText: (text: string) => void;}
 
-export default function WorkspaceEditor({
+function WorkspaceEditor({
   activePresentation,
   activeSlideIndex,
   onSelectSlideIndex,
@@ -1564,3 +1564,5 @@ export default function WorkspaceEditor({
     </div>
   );
 }
+
+export default memo(WorkspaceEditor);

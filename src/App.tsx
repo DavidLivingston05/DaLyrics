@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useRef, lazy, Suspense } from "react";
+import { useState, useEffect, useMemo, useRef, lazy, Suspense, useCallback } from "react";
 import { Presentation, Slide } from "./types";
 import { INITIAL_PRESENTATIONS } from "./data";
 import { getPresentations, savePresentations, savePresentationsBulk, loadBiblesFromDB, saveBibleToDB } from "./lib/db";
@@ -30,13 +30,16 @@ export default function App() {
 }
 
 
-function AppContent() {
-  const [currentTime, setCurrentTime] = useState(new Date());
+function ClockDisplay() {
+  const [time, setTime] = useState(new Date());
   useEffect(() => {
-    const timer = setInterval(() => setCurrentTime(new Date()), 1000);
+    const timer = setInterval(() => setTime(new Date()), 1000);
     return () => clearInterval(timer);
   }, []);
+  return <span className="bg-zinc-900/80 text-orange-450 px-4 py-2 rounded-xl border border-zinc-800/80 font-black text-sm text-orange-400">{time.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" })}</span>;
+}
 
+function AppContent() {
   const [isProjectionMode, setIsProjectionMode] = useState(() => window.location.hash === "#projection");
   const [isRemoteMode, setIsRemoteMode] = useState(() => window.location.hash === "#remote");
 
@@ -94,29 +97,29 @@ function AppContent() {
   });
   useEffect(() => { safeSaveLocalStorage("bible_saved_verses", JSON.stringify(bibleSavedVerses)); }, [bibleSavedVerses]);
 
-  const handleVerseSelected = (bookId: string, bookName: string, chapter: number, verse: number) => {
+  const handleVerseSelected = useCallback((bookId: string, bookName: string, chapter: number, verse: number) => {
     setBibleHistory(prev => [{ bookId, bookName, chapter, verse }, ...prev.filter(i => !(i.bookId === bookId && i.chapter === chapter && i.verse === verse))].slice(0, 20));
-  };
+  }, []);
 
-  const handleToggleSaveVerse = (bookId: string, bookName: string, chapter: number, verse: number, primaryText: string, refText?: string) => {
+  const handleToggleSaveVerse = useCallback((bookId: string, bookName: string, chapter: number, verse: number, primaryText: string, refText?: string) => {
     setBibleSavedVerses(prev => {
       const exists = prev.some(i => i.bookId === bookId && i.chapter === chapter && i.verse === verse);
       return exists ? prev.filter(i => !(i.bookId === bookId && i.chapter === chapter && i.verse === verse)) : [...prev, { bookId, bookName, chapter, verse, primaryText, refText }];
     });
-  };
+  }, []);
 
-  const handleRemoveSavedVerse = (bookId: string, chapter: number, verse: number) => {
+  const handleRemoveSavedVerse = useCallback((bookId: string, chapter: number, verse: number) => {
     setBibleSavedVerses(prev => prev.filter(i => !(i.bookId === bookId && i.chapter === chapter && i.verse === verse)));
-  };
+  }, []);
 
-  const handleJumpToVerse = (bookId: string, chapter: number, verse: number) => {
+  const handleJumpToVerse = useCallback((bookId: string, chapter: number, verse: number) => {
     setBibleActiveBookId(bookId); setBibleActiveChapter(chapter); setBibleActiveVerse(verse);
-  };
+  }, []);
 
-  const handleAddToSetlist = (presentation: any) => {
+  const handleAddToSetlist = useCallback((presentation: any) => {
     setSetlist(prev => [...prev, { uniqueId: presentation.id + "-" + Date.now() + "-" + Math.random().toString(36).substr(2, 9), presentationId: presentation.id, title: presentation.title }]);
-  };
-  const handleRemoveFromSetlist = (uniqueId: string) => setSetlist(prev => prev.filter(i => i.uniqueId !== uniqueId));
+  }, []);
+  const handleRemoveFromSetlist = useCallback((uniqueId: string) => setSetlist(prev => prev.filter(i => i.uniqueId !== uniqueId)), []);
 
   const [activeSlideIndex, setActiveSlideIndex] = useState<number | null>(null);
   const [isTextCleared, setIsTextCleared] = useState(false);
@@ -126,7 +129,7 @@ function AppContent() {
 
   const [quickRef, setQuickRef] = useState("");
   const quickRefRegex = /^\s*([1-3]\s*)?([a-zA-Z\u0B80-\u0BFF\s\.\u00a0]+?)\s*(\d+)(?:\s*[:\s-]\s*(\d+))?\s*$/i;
-  const handleQuickRefJump = () => {
+  const handleQuickRefJump = useCallback(() => {
     const q = quickRef.trim();
     if (!q) return;
     const m = q.match(quickRefRegex);
@@ -142,7 +145,7 @@ function AppContent() {
     setBibleActiveVerse(verse);
     setActiveMode("BIBLE");
     setQuickRef("");
-  };
+  }, [quickRef]);
 
   const [activeMode, setActiveMode] = useState<"SONGS" | "BIBLE">("SONGS");
   const [bibleProjectionText, setBibleProjectionText] = useState<string | null>(null);
@@ -186,7 +189,7 @@ function AppContent() {
   };
 
   const importFileRef = useRef<HTMLInputElement>(null);
-  const handleExport = async () => {
+  const handleExport = useCallback(async () => {
     const pres = await getPresentations();
     const bibles = await loadBiblesFromDB();
     const lsKeys = ['ultra_minimal_active_id','lyrics_setlist','bible_history','bible_saved_verses','library_sort_by','remote_pin','bible_primary_translation','bible_reference_translation','bible_desc_style','bible_desc_separator','bible_desc_position','bible_desc_show_version','bible_desc_alignment','bible_desc_line_height','bible_layout','bible_pagination_enabled','bible_heading_font_size','bible_heading_font_color','bible_heading_bg_color','bible_heading_bg_opacity','bible_verse_font_size','bible_verse_font_color','bible_verse_bg_color','bible_verse_bg_opacity','remote_paired_state','remote_pairing_pin'];
@@ -196,8 +199,8 @@ function AppContent() {
     const url = URL.createObjectURL(new Blob([json], { type:'application/json' }));
     const a = document.createElement('a'); a.href = url; a.download = `dalyric-backup-${new Date().toISOString().slice(0,10)}.json`;
     a.click(); URL.revokeObjectURL(url);
-  };
-  const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  }, []);
+  const handleImport = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     try {
@@ -209,7 +212,7 @@ function AppContent() {
       window.location.reload();
     } catch (err) { alert('Import failed: ' + (err instanceof Error ? err.message : 'Unknown error')); }
     e.target.value = '';
-  };
+  }, []);
   useEffect(() => {
     if (autoTimerRef.current) { clearInterval(autoTimerRef.current); autoTimerRef.current = null; }
     if (autoAdvanceDelay <= 0) return;
@@ -270,7 +273,7 @@ function AppContent() {
     countdownActive,
     countdownDuration,
     countdownStartTime: countdownStartRef.current,
-  }), [activeSlide, isBlackout, isTextCleared, isLowerThird, activePresentation, isDisplayingText, activeMode, bibleReferenceText, bs.bibleDescPosition, bs.bibleVerseFontSize, bs.bibleVerseFontColor, bs.bibleVerseBgColor, bs.bibleVerseBgOpacity, bs.bibleHeadingFontSize, bs.bibleHeadingFontColor, bs.bibleHeadingBgColor, bs.bibleHeadingBgOpacity, liveCaptionText, countdownActive, countdownDuration]);
+  }), [activeSlide, isBlackout, isTextCleared, isLowerThird, activePresentation, activeMode, bibleReferenceText, bs.bibleDescPosition, bs.bibleVerseFontSize, bs.bibleVerseFontColor, bs.bibleVerseBgColor, bs.bibleVerseBgOpacity, bs.bibleHeadingFontSize, bs.bibleHeadingFontColor, bs.bibleHeadingBgColor, bs.bibleHeadingBgOpacity, liveCaptionText, countdownActive, countdownDuration]);
 
   useEffect(() => {
     safeSaveLocalStorage("lyrics_last_projection_packet", JSON.stringify(projectionPacket));
@@ -406,10 +409,16 @@ function AppContent() {
     return () => window.removeEventListener("keydown", h);
   }, [activePresentation, activePresentationForModes, activeMode, setlist, activePresentationId]);
 
-  useEffect(() => { if (hasRestored.current) savePresentations(presentations).catch(() => {}); }, [presentations]);
+  const saveTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  useEffect(() => {
+    if (!hasRestored.current) return;
+    if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+    saveTimerRef.current = setTimeout(() => { savePresentations(presentations).catch(() => {}); }, 1500);
+    return () => { if (saveTimerRef.current) clearTimeout(saveTimerRef.current); };
+  }, [presentations]);
   useEffect(() => { if (activePresentationId) safeSaveLocalStorage("ultra_minimal_active_id", activePresentationId); else try { localStorage.removeItem("ultra_minimal_active_id"); } catch (e) {} }, [activePresentationId]);
 
-  const h = {
+  const h = useMemo(() => ({
     selectPres: (id: string) => { setActivePresentationId(id); setActiveSlideIndex(null); },
     selectSlide: (index: number) => { historyRef.current.push({ ...stateRef.current }); if (historyRef.current.length > 50) historyRef.current.shift(); setActiveSlideIndex(index); setIsTextCleared(false); setIsBlackout(false); },
     addPres: (title: string) => {
@@ -439,7 +448,7 @@ function AppContent() {
       if (!targeted) { w = 1024; h = 576; left = (window.screen.width - w) / 2; top = (window.screen.height - h) / 2; }
       try { const popup = window.open(url, "LyricsStageProjectionWindow", "left=" + left + ",top=" + top + ",width=" + w + ",height=" + h + ",menubar=no,status=no,titlebar=no,toolbar=no,scrollbars=no,resizable=yes"); if (popup) popup.focus(); else window.open(url, "_blank"); } catch (e) { window.open(url, "_blank"); }
     }
-  };
+  }), [presentations, activePresentationId, activeMode, activePresentationForModes]);
 
   return (
     <div className="h-screen w-screen overflow-hidden bg-zinc-950 text-zinc-100 flex flex-col font-sans select-none antialiased">
@@ -476,7 +485,7 @@ function AppContent() {
           <button onClick={handleExport} className="px-3 py-2 bg-zinc-900/80 text-zinc-400 border border-zinc-800/80 hover:text-zinc-200 hover:border-zinc-700 rounded-xl transition-all text-[11px] font-display font-bold tracking-wider uppercase cursor-pointer" title="Export backup">📦</button>
           <button onClick={() => importFileRef.current?.click()} className="px-3 py-2 bg-zinc-900/80 text-zinc-400 border border-zinc-800/80 hover:text-zinc-200 hover:border-zinc-700 rounded-xl transition-all text-[11px] font-display font-bold tracking-wider uppercase cursor-pointer" title="Import backup">📂</button>
           <input ref={importFileRef} type="file" accept=".json" onChange={handleImport} className="hidden" />
-          <span className="bg-zinc-900/80 text-orange-450 px-4 py-2 rounded-xl border border-zinc-800/80 font-black text-sm text-orange-400">{currentTime.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" })}</span>
+          <ClockDisplay />
         </div>
       </header>
       <div className="flex-1 flex min-h-0 overflow-hidden">

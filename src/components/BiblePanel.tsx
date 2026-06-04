@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect, useCallback } from 'react';
+import React, { useState, useMemo, useEffect, useCallback, memo } from 'react';
 import { useBibleStyle } from '../contexts/BibleStyleContext';
 import { Book, Star, Settings } from 'lucide-react';
 import { BIBLE_BOOKS_METADATA, BibleBookInfo } from '../lib/bibleMetadata';
@@ -618,7 +618,7 @@ const loadBiblesFromDB = async (): Promise<OfflineBible[]> => {
   }
 };
 
-export default function BiblePanel({
+function BiblePanel({
   onProjectText,
   onClearText,
   isTextCleared,
@@ -1826,7 +1826,9 @@ export default function BiblePanel({
         getVerseText={getVerseText}
         deleteBibleFromDB={deleteBibleFromDB}
       />
-
+ 
     </div>
   );
 }
+
+export default memo(BiblePanel);
