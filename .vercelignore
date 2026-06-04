@@ -1,0 +1,9 @@
+node_modules/
+dist/
+dist-electron/
+build/
+release/
+Old exe/
+.git/
+*.log
+.DS_Store

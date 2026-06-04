@@ -1,4 +1,3 @@
-import React from 'react';
 import { BibleBookInfo, BIBLE_BOOKS_METADATA } from '../lib/bibleMetadata';
 import { Book, Search, ArrowRight } from 'lucide-react';
 

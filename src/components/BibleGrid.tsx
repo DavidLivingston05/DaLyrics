@@ -1,4 +1,3 @@
-import React from 'react';
 import { BibleBookInfo } from '../lib/bibleMetadata';
 import { Search } from 'lucide-react';
 

@@ -16,13 +16,8 @@
     "download-bible": "node scripts/download-bible.js"
   },
   "dependencies": {
-    "@tsparticles/engine": "^4.1.0",
-    "@tsparticles/react": "^4.1.0",
-    "@tsparticles/slim": "^4.1.0",
     "lucide-react": "^0.546.0",
     "motion": "^12.23.24",
-    "qrcode": "^1.5.4",
-    "qrcode.react": "^4.2.0",
     "react": "^19.0.1",
     "react-dom": "^19.0.1",
     "ws": "^8.21.0"

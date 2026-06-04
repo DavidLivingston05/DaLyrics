@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useRef, lazy, Suspense } from "react";
+import { useState, useEffect, useMemo, useRef, lazy, Suspense } from "react";
 import { Presentation, Slide } from "./types";
 import { INITIAL_PRESENTATIONS } from "./data";
 import { getPresentations, savePresentations, savePresentationsBulk, loadBiblesFromDB, saveBibleToDB } from "./lib/db";

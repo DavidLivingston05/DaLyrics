@@ -29,14 +29,7 @@ export default defineConfig(() => {
             'vendor-lucide': ['lucide-react'],
             // Animation library
             'vendor-motion': ['motion'],
-            // QR code libraries
-            'vendor-qrcode': ['qrcode', 'qrcode.react'],
-            // Particles libraries
-            'vendor-particles': [
-              '@tsparticles/engine',
-              '@tsparticles/react',
-              '@tsparticles/slim',
-            ],
+
           },
         },
       },

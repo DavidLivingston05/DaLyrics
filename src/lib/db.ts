@@ -18,29 +18,6 @@ export function initDB(): Promise<IDBDatabase> {
   });
 }
 
-export async function savePresentation(pres: Presentation): Promise<void> {
-  const db = await initDB();
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction(STORE_NAME, 'readwrite');
-    const store = tx.objectStore(STORE_NAME);
-    const req = store.put(pres);
-    req.onsuccess = () => resolve();
-    req.onerror = () => reject(req.error);
-    tx.onerror = () => reject(tx.error);
-  });
-}
-
-export async function deletePresentation(id: string): Promise<void> {
-  const db = await initDB();
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction(STORE_NAME, 'readwrite');
-    const store = tx.objectStore(STORE_NAME);
-    const req = store.delete(id);
-    req.onsuccess = () => resolve();
-    req.onerror = () => reject(req.error);
-  });
-}
-
 export async function savePresentations(presentations: Presentation[]): Promise<void> {
   if (presentations.length === 0) return;
   const db = await initDB();
@@ -73,21 +50,6 @@ export async function getPresentations(): Promise<Presentation[]> {
     });
   } catch {
     return [];
-  }
-}
-
-export async function getPresentation(id: string): Promise<Presentation | undefined> {
-  try {
-    const db = await initDB();
-    return new Promise((resolve, reject) => {
-      const tx = db.transaction(STORE_NAME, 'readonly');
-      const store = tx.objectStore(STORE_NAME);
-      const request = store.get(id);
-      request.onsuccess = () => resolve(request.result || undefined);
-      request.onerror = () => reject(request.error);
-    });
-  } catch {
-    return undefined;
   }
 }
 

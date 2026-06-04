@@ -121,15 +121,3 @@ export interface OfflineBible {
   database: Record<string, string>;
   books: ParsedBook[];
 }
-
-export interface Background {
-  id: string;
-  name: string;
-  type: BackgroundType;
-  config: BackgroundConfig;
-  thumbnail?: string;
-  isFavorite: boolean;
-  usageCount: number;
-  createdAt: string;
-  tags: string[];
-}

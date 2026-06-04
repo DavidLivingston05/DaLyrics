@@ -1,5 +1,5 @@
-import React, { useMemo, useState, useEffect } from 'react';
-import { Presentation, Slide, StyleSettings, OfflineBible } from '../types';
+import { useMemo, useState, useEffect } from 'react';
+import { Presentation, Slide, OfflineBible } from '../types';
 import { LayoutGrid, FileText, Tv, Check, Play, FileEdit, Info, Sliders, BookOpen } from 'lucide-react';
 import { loadBiblesFromDB } from '../lib/db';
 import { BIBLE_BOOKS_METADATA } from '../lib/bibleMetadata';
