@@ -32,7 +32,7 @@ export const useTextAutoFit = (
       const contentHeight = hostHeight - padV;
       if (contentHeight <= 0) return;
 
-      const baseSize = parseFloat(el.dataset.baseFontSize || '1.4');
+      const baseSize = parseFloat(el.dataset.baseFontSize || '10');
       let scale = fitScaleRef.current;
 
       el.style.fontSize = `${baseSize * scale}rem`;

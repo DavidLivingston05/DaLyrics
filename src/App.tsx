@@ -1,15 +1,18 @@
-import React, { useState, useEffect, useMemo, useRef } from "react";
+import React, { useState, useEffect, useMemo, useRef, lazy, Suspense } from "react";
 import { Presentation, Slide } from "./types";
 import { INITIAL_PRESENTATIONS } from "./data";
-import PresentationList from "./components/PresentationList";
 import { getPresentations, savePresentations, savePresentationsBulk, loadBiblesFromDB, saveBibleToDB } from "./lib/db";
-import WorkspaceEditor from "./components/WorkspaceEditor";
-import FullscreenProjection from "./components/FullscreenProjection";
-import LiveMonitor from "./components/LiveMonitor";
-import BiblePanel, { getBookInfo } from "./components/BiblePanel";
-import MobileRemote from "./components/MobileRemote";
 import { BibleStyleProvider, useBibleStyle } from "./contexts/BibleStyleContext";
 import { BookOpen, Music, Sparkles, Monitor, Play, Search } from "lucide-react";
+import { getBookInfo } from "./lib/bibleMetadata";
+
+const PresentationList = lazy(() => import("./components/PresentationList"));
+const WorkspaceEditor = lazy(() => import("./components/WorkspaceEditor"));
+const FullscreenProjection = lazy(() => import("./components/FullscreenProjection"));
+const LiveMonitor = lazy(() => import("./components/LiveMonitor"));
+const BiblePanel = lazy(() => import("./components/BiblePanel"));
+const MobileRemote = lazy(() => import("./components/MobileRemote"));
+
 
 export function safeSaveLocalStorage(key: string, value: string) {
   try { localStorage.setItem(key, value); }
@@ -17,8 +20,15 @@ export function safeSaveLocalStorage(key: string, value: string) {
 }
 
 export default function App() {
-  return <BibleStyleProvider><AppContent /></BibleStyleProvider>;
+  return (
+    <BibleStyleProvider>
+      <Suspense fallback={<div className="h-screen w-screen bg-zinc-950 flex items-center justify-center"><div className="w-8 h-8 border-2 border-orange-500 border-t-transparent rounded-full animate-spin" /></div>}>
+        <AppContent />
+      </Suspense>
+    </BibleStyleProvider>
+  );
 }
+
 
 function AppContent() {
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -39,8 +49,9 @@ function AppContent() {
     return () => window.removeEventListener("hashchange", handleHashChange);
   }, []);
 
-  if (isRemoteMode) return <MobileRemote />;
-  if (isProjectionMode) return <FullscreenProjection />;
+  if (isRemoteMode) return <Suspense fallback={null}><MobileRemote /></Suspense>;
+  if (isProjectionMode) return <Suspense fallback={null}><FullscreenProjection /></Suspense>;
+
 
   const [presentations, setPresentations] = useState<Presentation[]>(() => INITIAL_PRESENTATIONS);
   const hasRestored = useRef(false);
@@ -433,38 +444,39 @@ function AppContent() {
   return (
     <div className="h-screen w-screen overflow-hidden bg-zinc-950 text-zinc-100 flex flex-col font-sans select-none antialiased">
       <header className="px-6 py-3.5 bg-neutral-950/95 border-b border-zinc-900 flex items-center justify-between shrink-0 shadow-xl shadow-black/10 z-20 backdrop-blur-md">
-        <div className="flex items-center gap-3">
-          <div className="relative flex items-center justify-center w-8 h-8 rounded-xl bg-gradient-to-br from-orange-500 to-amber-600 shadow-lg shadow-orange-950/40 border border-orange-400/20">
-            <Music className="w-4 h-4 text-white" />
+        <div className="flex items-center gap-4">
+          <div className="relative flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br from-orange-500 to-amber-600 shadow-lg shadow-orange-950/40 border border-orange-400/20">
+            <Music className="w-5 h-5 text-white" />
             <div className="absolute -top-1 -right-1 bg-zinc-950 text-orange-400 rounded-full p-0.5 border border-orange-500/40">
-              <Sparkles className="w-2 h-2 animate-pulse" />
+              <Sparkles className="w-2.5 h-2.5 animate-pulse" />
             </div>
           </div>
-          <span className="text-base font-display font-bold tracking-[0.2em] leading-none bg-gradient-to-r from-orange-500 via-amber-300 to-white bg-clip-text text-transparent">DALYRIC</span>
+          <span className="text-lg font-display font-bold tracking-[0.2em] leading-none bg-gradient-to-r from-orange-500 via-amber-300 to-white bg-clip-text text-transparent">DALYRIC</span>
         </div>
-        <div className="flex items-center gap-1.5 bg-zinc-900/60 p-1.5 rounded-xl border border-zinc-850/80">
-          <button onClick={() => { setActiveMode("SONGS"); setBibleProjectionText(null); }} className={"px-4 py-1.5 flex items-center gap-1.5 text-[11px] font-display font-bold tracking-wider uppercase transition-all cursor-pointer " + (activeMode === "SONGS" ? "bg-gradient-to-r from-orange-500 to-amber-600 text-white rounded-lg shadow-md shadow-orange-950/40 font-extrabold border border-orange-450/20" : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/50 rounded-lg")}>Songs</button>
-          <button onClick={() => setActiveMode("BIBLE")} className={"px-4 py-1.5 flex items-center gap-1.5 text-[11px] font-display font-bold tracking-wider uppercase transition-all cursor-pointer " + (activeMode === "BIBLE" ? "bg-gradient-to-r from-orange-500 to-amber-600 text-white rounded-lg shadow-md shadow-orange-950/40 font-extrabold border border-orange-450/20" : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/50 rounded-lg")}><BookOpen className="w-3.5 h-3.5 text-orange-200" />Bible</button>
+        <div className="flex items-center gap-1.5 bg-zinc-900/60 p-1 rounded-xl border border-zinc-850/80">
+          <button onClick={() => { setActiveMode("SONGS"); setBibleProjectionText(null); }} className={"px-5 py-2 flex items-center gap-1.5 text-[12px] font-display font-bold tracking-wider uppercase transition-all cursor-pointer " + (activeMode === "SONGS" ? "bg-gradient-to-r from-orange-500 to-amber-600 text-white rounded-lg shadow-md shadow-orange-950/40 font-extrabold border border-orange-450/20" : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/50 rounded-lg")}>Songs</button>
+          <button onClick={() => setActiveMode("BIBLE")} className={"px-5 py-2 flex items-center gap-1.5 text-[12px] font-display font-bold tracking-wider uppercase transition-all cursor-pointer " + (activeMode === "BIBLE" ? "bg-gradient-to-r from-orange-500 to-amber-600 text-white rounded-lg shadow-md shadow-orange-950/40 font-extrabold border border-orange-450/20" : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/50 rounded-lg")}><BookOpen className="w-4 h-4 text-orange-200" />Bible</button>
         </div>
         <div className="relative flex items-center">
-          <Search className="w-3.5 h-3.5 text-zinc-500 absolute left-2.5 pointer-events-none" />
+          <Search className="w-4 h-4 text-zinc-500 absolute left-3 pointer-events-none" />
           <input
             type="text"
             value={quickRef}
             onChange={e => setQuickRef(e.target.value)}
             onKeyDown={e => { if (e.key === 'Enter') handleQuickRefJump(); if (e.key === 'Escape') setQuickRef(''); }}
             placeholder="Gen 1:1 or ஆதி 1:1"
-            className="w-44 bg-zinc-900/60 hover:bg-zinc-900 focus:bg-zinc-950 border border-zinc-800 hover:border-zinc-700 focus:border-orange-500/60 rounded-xl px-2 py-1.5 pl-8 text-[11px] text-zinc-200 focus:outline-none font-sans placeholder-zinc-500 transition-all"
+            className="w-48 bg-zinc-900/60 hover:bg-zinc-900 focus:bg-zinc-950 border border-zinc-800 hover:border-zinc-700 focus:border-orange-500/60 rounded-xl px-3 py-2 pl-10 text-[12px] text-zinc-200 focus:outline-none font-sans placeholder-zinc-500 transition-all"
           />
         </div>
-        <div className="text-[10px] font-mono text-zinc-500 flex items-center gap-2 font-bold">
-          <button onClick={() => setIsLivePanelOpen(v => !v)} className={"px-3 py-1.5 flex items-center gap-1.5 text-[11px] font-display font-bold tracking-wider uppercase transition-all cursor-pointer rounded-xl border " + (isLivePanelOpen ? "bg-orange-500/20 text-orange-400 border-orange-500/40" : "bg-zinc-900/80 text-zinc-400 border-zinc-800/80 hover:text-zinc-200 hover:border-zinc-700")}><Monitor className="w-3.5 h-3.5" />{isLivePanelOpen ? "Live" : "Preview"}</button>
-          <button onClick={() => setAutoAdvanceDelay(p => p === 0 ? 5000 : p === 5000 ? 10000 : p === 10000 ? 30000 : 0)} className={"px-2.5 py-1.5 flex items-center gap-1 text-[10px] font-display font-bold tracking-wider uppercase transition-all cursor-pointer rounded-xl border " + (autoAdvanceDelay > 0 ? "bg-green-500/20 text-green-400 border-green-500/40" : "bg-zinc-900/80 text-zinc-500 border-zinc-800/80 hover:text-zinc-400 hover:border-zinc-700")}><Play className={"w-3 h-3 " + (autoAdvanceDelay > 0 ? "fill-green-400" : "")} />{autoAdvanceDelay > 0 ? (autoAdvanceDelay / 1000) + "s" : "Auto"}</button>
-          <button onClick={handleToggleCountdown} className={"px-2.5 py-1.5 flex items-center gap-1 text-[10px] font-display font-bold tracking-wider uppercase transition-all cursor-pointer rounded-xl border " + (countdownActive ? "bg-red-500/20 text-red-400 border-red-500/40 animate-pulse" : "bg-zinc-900/80 text-zinc-500 border-zinc-800/80 hover:text-zinc-400 hover:border-zinc-700")}>{countdownActive ? "Stop" : "Timer"}</button>
-          <button onClick={handleExport} className="px-2 py-1.5 bg-zinc-900/80 text-zinc-400 border border-zinc-800/80 hover:text-zinc-200 hover:border-zinc-700 rounded-xl transition-all text-[10px] font-display font-bold tracking-wider uppercase cursor-pointer" title="Export backup">📦</button>
-          <button onClick={() => importFileRef.current?.click()} className="px-2 py-1.5 bg-zinc-900/80 text-zinc-400 border border-zinc-800/80 hover:text-zinc-200 hover:border-zinc-700 rounded-xl transition-all text-[10px] font-display font-bold tracking-wider uppercase cursor-pointer" title="Import backup">📂</button>
+        <div className="text-[11px] font-mono text-zinc-500 flex items-center gap-2 font-bold">
+          <button onClick={() => setIsLivePanelOpen(v => !v)} className={"px-4 py-2 flex items-center gap-1.5 text-[12px] font-display font-bold tracking-wider uppercase transition-all cursor-pointer rounded-xl border " + (isLivePanelOpen ? "bg-orange-500/20 text-orange-400 border-orange-500/40 shadow-inner shadow-orange-950/20" : "bg-zinc-900/80 text-zinc-400 border-zinc-800/80 hover:text-zinc-200 hover:border-zinc-700")}><Monitor className="w-4 h-4" />{isLivePanelOpen ? "Live" : "Preview"}</button>
+          <button onClick={() => setAutoAdvanceDelay(p => p === 0 ? 5000 : p === 5000 ? 10000 : p === 10000 ? 30000 : 0)} className={"px-3 py-2 flex items-center gap-1 text-[11px] font-display font-bold tracking-wider uppercase transition-all cursor-pointer rounded-xl border " + (autoAdvanceDelay > 0 ? "bg-green-500/20 text-green-400 border-green-500/40" : "bg-zinc-900/80 text-zinc-500 border-zinc-800/80 hover:text-zinc-400 hover:border-zinc-700")}><Play className={"w-3.5 h-3.5 " + (autoAdvanceDelay > 0 ? "fill-green-400" : "")} />{autoAdvanceDelay > 0 ? (autoAdvanceDelay / 1000) + "s" : "Auto"}</button>
+          <button onClick={handleToggleCountdown} className={"px-3 py-2 flex items-center gap-1 text-[11px] font-display font-bold tracking-wider uppercase transition-all cursor-pointer rounded-xl border " + (countdownActive ? "bg-red-500/20 text-red-400 border-red-500/40 animate-pulse" : "bg-zinc-900/80 text-zinc-500 border-zinc-800/80 hover:text-zinc-400 hover:border-zinc-700")}>{countdownActive ? "Stop" : "Timer"}</button>
+          <div className="w-px h-6 bg-zinc-800/60 mx-1" />
+          <button onClick={handleExport} className="px-3 py-2 bg-zinc-900/80 text-zinc-400 border border-zinc-800/80 hover:text-zinc-200 hover:border-zinc-700 rounded-xl transition-all text-[11px] font-display font-bold tracking-wider uppercase cursor-pointer" title="Export backup">📦</button>
+          <button onClick={() => importFileRef.current?.click()} className="px-3 py-2 bg-zinc-900/80 text-zinc-400 border border-zinc-800/80 hover:text-zinc-200 hover:border-zinc-700 rounded-xl transition-all text-[11px] font-display font-bold tracking-wider uppercase cursor-pointer" title="Import backup">📂</button>
           <input ref={importFileRef} type="file" accept=".json" onChange={handleImport} className="hidden" />
-          <span className="bg-zinc-900/80 text-orange-450 px-3 py-1.5 rounded-xl border border-zinc-800/80 font-black text-xs text-orange-400">{currentTime.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" })}</span>
+          <span className="bg-zinc-900/80 text-orange-450 px-4 py-2 rounded-xl border border-zinc-800/80 font-black text-sm text-orange-400">{currentTime.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" })}</span>
         </div>
       </header>
       <div className="flex-1 flex min-h-0 overflow-hidden">

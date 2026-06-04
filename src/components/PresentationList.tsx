@@ -640,10 +640,10 @@ export default function PresentationList({
   };
 
   return (
-    <div className="w-64 border-r border-zinc-900 bg-zinc-950 flex flex-col h-full shrink-0 font-sans select-none" id="left-column">
+    <div className="w-72 border-r border-zinc-900 bg-zinc-950 flex flex-col h-full shrink-0 font-sans select-none" id="left-column">
       <div className="p-4 py-5 border-b border-zinc-900/60 flex items-center justify-between shrink-0 bg-neutral-950">
-        <h2 className="text-[11px] font-display font-extrabold uppercase tracking-[0.15em] text-zinc-450">
-          Library List ({presentations.length})
+        <h2 className="text-[12px] font-display font-extrabold uppercase tracking-[0.15em] text-zinc-400">
+          Library <span className="text-zinc-600 font-mono text-[10px]">({presentations.length})</span>
         </h2>
         
         <div className="flex items-center gap-1.5 shrink-0">
@@ -651,11 +651,11 @@ export default function PresentationList({
             onClick={() => {
               setShowAddForm(!showAddForm);
             }}
-            className="px-2.5 py-1.5 bg-zinc-900 hover:bg-zinc-800 border border-zinc-850 hover:border-zinc-700 rounded-lg text-[10px] font-display font-bold tracking-wider text-zinc-300 flex items-center gap-1 cursor-pointer shadow-sm hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 ease-in-out"
+            className="px-3 py-1.5 bg-zinc-900 hover:bg-zinc-800 border border-zinc-850 hover:border-zinc-700 rounded-lg text-[11px] font-display font-bold tracking-wider text-zinc-300 flex items-center gap-1 cursor-pointer shadow-sm hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 ease-in-out"
             id="btn-add-item-sidebar"
             title="Add a new single song or slide deck"
           >
-            <Plus className="w-3.5 h-3.5 text-orange-450" />
+            <Plus className="w-4 h-4 text-orange-450" />
             <span className="uppercase">Add</span>
           </button>
 
@@ -664,11 +664,11 @@ export default function PresentationList({
               setShowBulkImport(true);
               setShowAddForm(false);
             }}
-            className="px-2.5 py-1.5 bg-zinc-900 hover:bg-zinc-850 border border-zinc-850 hover:border-zinc-700 rounded-lg text-[10px] font-display font-bold tracking-wider text-emerald-450 hover:text-emerald-300 flex items-center gap-1 cursor-pointer shadow-sm hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 ease-in-out"
+            className="px-3 py-1.5 bg-zinc-900 hover:bg-zinc-850 border border-zinc-850 hover:border-zinc-700 rounded-lg text-[11px] font-display font-bold tracking-wider text-emerald-450 hover:text-emerald-300 flex items-center gap-1 cursor-pointer shadow-sm hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 ease-in-out"
             id="btn-bulk-import-sidebar"
             title="Import multiple songs at once from plain text"
           >
-            <Upload className="w-3.5 h-3.5 text-emerald-400" />
+            <Upload className="w-4 h-4 text-emerald-400" />
             <span className="uppercase">Bulk</span>
           </button>
         </div>
@@ -755,7 +755,7 @@ export default function PresentationList({
         </form>
       )}
       <div 
-        className="flex-1 overflow-y-auto p-3 space-y-2.5" 
+        className="flex-1 overflow-y-auto p-3 space-y-2" 
         id="presentation-list-container"
         onScroll={handleScroll}
       >
@@ -772,14 +772,14 @@ export default function PresentationList({
               <div key={p.id} className="space-y-1">
                 <div
                   onClick={() => !isEditing && onSelect(p.id)}
-                  className={`group flex items-center justify-between text-left rounded-xl transition-all duration-300 px-2.5 py-2 cursor-pointer border border-transparent hover:translate-x-0.5 ${
+                  className={`group flex items-center justify-between text-left rounded-xl transition-all duration-300 px-3 py-2.5 cursor-pointer border ${
                     isActive
-                      ? 'bg-zinc-900 border-zinc-800 ring-1 ring-orange-500/30 text-white shadow-lg shadow-black/40 font-semibold'
+                      ? 'bg-zinc-900 border-zinc-700 ring-1 ring-orange-500/30 text-white shadow-lg shadow-black/40 font-semibold'
                       : 'bg-zinc-950/25 hover:bg-zinc-900/40 hover:text-zinc-200 border-transparent text-zinc-450'
                   }`}
                   id={`item-row-${p.id}`}
                 >
-                  <div className="flex-1 min-w-0 flex items-center gap-2">
+                  <div className="flex-1 min-w-0 flex items-center gap-2.5">
                     <button
                       type="button"
                       onClick={(e) => {
@@ -788,7 +788,7 @@ export default function PresentationList({
                           onAddToSetlist(p);
                         }
                       }}
-                      className={`p-1 rounded-lg border transition-all duration-300 cursor-pointer shadow-sm active:scale-90 shrink-0 ${
+                      className={`p-1.5 rounded-lg border transition-all duration-300 cursor-pointer shadow-sm active:scale-90 shrink-0 ${
                         isActive 
                           ? 'bg-orange-500 hover:bg-orange-600 border-orange-400 text-white' 
                           : 'bg-zinc-900 hover:bg-orange-500/10 hover:border-orange-500/25 text-zinc-450 hover:text-orange-400'
@@ -821,14 +821,14 @@ export default function PresentationList({
                       </form>
                     ) : (
                       <div className="min-w-0 flex-1">
-                        <p className={`text-[11px] whitespace-normal break-words leading-tight tracking-wide ${isActive ? 'text-zinc-100 font-bold' : 'text-zinc-400'}`}>
+                        <p className={`text-xs whitespace-normal break-words leading-tight tracking-wide ${isActive ? 'text-zinc-100 font-bold' : 'text-zinc-400'}`}>
                           {highlightText(p.title)}
                         </p>
-                        <span className="text-[8px] font-mono text-zinc-500 uppercase tracking-widest block mt-0.5">
+                        <span className="text-[9px] font-mono text-zinc-500 uppercase tracking-widest block mt-0.5">
                           {p.slides.length} slides
                         </span>
                         {matchPreviews[p.id] && (
-                          <p className="text-[9px] text-zinc-400 italic leading-tight mt-1 truncate">
+                          <p className="text-[10px] text-zinc-400 italic leading-tight mt-1 truncate">
                             {highlightText(matchPreviews[p.id])}
                           </p>
                         )}
@@ -864,8 +864,8 @@ export default function PresentationList({
         )}
       </div>
 
-      <div className="p-3.5 bg-neutral-950 border-t border-zinc-900 text-[9px] font-mono text-zinc-650 flex items-center justify-between shrink-0">
-        <span>Ready</span>
+      <div className="p-3.5 bg-neutral-950 border-t border-zinc-900 text-[10px] font-mono text-zinc-600 flex items-center justify-between shrink-0">
+        <span className="flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full bg-emerald-500/60"></span>Ready</span>
         <span className="text-zinc-500 font-bold uppercase tracking-wider">v1.2.0</span>
       </div>
 

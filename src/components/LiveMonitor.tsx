@@ -81,10 +81,10 @@ export default function LiveMonitor({
   };
 
   return (
-    <div className="w-80 bg-zinc-950 border-l border-zinc-900 flex flex-col h-full shrink-0 select-none font-sans">
+    <div className="w-96 bg-zinc-950 border-l border-zinc-900 flex flex-col h-full shrink-0 select-none font-sans shadow-2xl shadow-black/30">
       {/* Header */}
       <div className="p-4 py-5 border-b border-zinc-900/60 flex items-center justify-between shrink-0 bg-neutral-950">
-        <h2 className="text-[11px] font-display font-extrabold uppercase tracking-[0.15em] text-zinc-450">
+        <h2 className="text-[12px] font-display font-extrabold uppercase tracking-[0.15em] text-zinc-400">
           Live Monitor
         </h2>
         <div className="flex items-center gap-2">
@@ -119,7 +119,7 @@ export default function LiveMonitor({
             )}
           </div>
 
-          <div className="w-full aspect-video rounded-xl border border-zinc-800 bg-black relative flex flex-col overflow-hidden shadow-2xl">
+          <div className="w-full rounded-xl border border-zinc-800 bg-black relative flex flex-col overflow-hidden shadow-2xl" style={{ aspectRatio: '16 / 9', minHeight: '200px' }}>
             {/* Grid pattern */}
             {!isDisplayingText && !isBlackout && (
               <div className="absolute inset-0 opacity-10 bg-[linear-gradient(to_right,#1f2937_1px,transparent_1px),linear-gradient(to_bottom,#1f2937_1px,transparent_1px)] bg-[size:10px_10px]" />
@@ -137,7 +137,7 @@ export default function LiveMonitor({
                 {/* Heading */}
                 {/* Reference heading (top position) */}
                 {reference && activeMode === 'BIBLE' && bibleDescPosition === 'top_separate' && (
-                  <span className="text-[7px] font-sans font-bold text-white bg-neutral-950/60 border border-white/10 px-2.5 py-1 rounded backdrop-blur-sm mb-2 inline-block" style={previewHeading()}>
+                  <span className="text-[9px] font-sans font-bold text-white bg-neutral-950/60 border border-white/10 px-3 py-1.5 rounded backdrop-blur-sm mb-2 inline-block" style={previewHeading()}>
                     {reference}
                   </span>
                 )}
@@ -147,9 +147,10 @@ export default function LiveMonitor({
                   <p
                     className="break-words whitespace-pre-wrap text-center leading-snug select-text"
                     style={{
-                      fontSize: activeMode === 'BIBLE' ? `${bs.bibleVerseFontSize * 0.045}rem` : '0.7rem',
+                      fontSize: activeMode === 'BIBLE' ? `${bs.bibleVerseFontSize * 0.065}rem` : '1rem',
                       color: activeMode === 'BIBLE' ? bs.bibleVerseFontColor : '#fff',
                       fontFamily: 'system-ui',
+                      fontWeight: 600,
                     }}
                   >
                     {activeText}
@@ -159,7 +160,7 @@ export default function LiveMonitor({
                 {/* Reference at bottom */}
                 {reference && (activeMode !== 'BIBLE' || bibleDescPosition !== 'top_separate') && (
                   bibleDescPosition === 'bottom_separate' && activeMode === 'BIBLE' ? (
-                    <span className="text-[7px] font-sans font-bold text-white bg-neutral-950/60 border border-white/10 px-2.5 py-1 rounded backdrop-blur-sm mt-2 inline-block" style={previewHeading()}>
+                    <span className="text-[9px] font-sans font-bold text-white bg-neutral-950/60 border border-white/10 px-3 py-1.5 rounded backdrop-blur-sm mt-2 inline-block" style={previewHeading()}>
                       {reference}
                     </span>
                   ) : (
@@ -182,9 +183,9 @@ export default function LiveMonitor({
           <button
             type="button"
             onClick={onToggleClearText}
-            className={`flex-1 py-2 text-[10px] font-mono font-bold uppercase tracking-wider rounded-lg border transition-all cursor-pointer ${
+            className={`flex-1 py-2.5 text-[11px] font-mono font-bold uppercase tracking-wider rounded-lg border transition-all cursor-pointer ${
               isTextCleared
-                ? 'bg-amber-500/20 text-amber-400 border-amber-500/30'
+                ? 'bg-amber-500/20 text-amber-400 border-amber-500/30 shadow-inner shadow-amber-950/20'
                 : 'bg-zinc-900/60 text-zinc-400 border-zinc-800 hover:bg-zinc-800 hover:text-zinc-200'
             }`}
           >
@@ -193,9 +194,9 @@ export default function LiveMonitor({
           <button
             type="button"
             onClick={onToggleBlackout}
-            className={`flex-1 py-2 text-[10px] font-mono font-bold uppercase tracking-wider rounded-lg border transition-all cursor-pointer ${
+            className={`flex-1 py-2.5 text-[11px] font-mono font-bold uppercase tracking-wider rounded-lg border transition-all cursor-pointer ${
               isBlackout
-                ? 'bg-rose-500/20 text-rose-400 border-rose-500/30'
+                ? 'bg-rose-500/20 text-rose-400 border-rose-500/30 shadow-inner shadow-rose-950/20'
                 : 'bg-zinc-900/60 text-zinc-400 border-zinc-800 hover:bg-zinc-800 hover:text-zinc-200'
             }`}
           >
@@ -204,9 +205,9 @@ export default function LiveMonitor({
           <button
             type="button"
             onClick={onToggleLowerThird}
-            className={`flex-1 py-2 text-[10px] font-mono font-bold uppercase tracking-wider rounded-lg border transition-all cursor-pointer ${
+            className={`flex-1 py-2.5 text-[11px] font-mono font-bold uppercase tracking-wider rounded-lg border transition-all cursor-pointer ${
               isLowerThird
-                ? 'bg-blue-500/20 text-blue-400 border-blue-500/30'
+                ? 'bg-blue-500/20 text-blue-400 border-blue-500/30 shadow-inner shadow-blue-950/20'
                 : 'bg-zinc-900/60 text-zinc-400 border-zinc-800 hover:bg-zinc-800 hover:text-zinc-200'
             }`}
           >
@@ -217,15 +218,15 @@ export default function LiveMonitor({
         {/* Bottom panel: Bible Hub or Setlist */}
         {activeMode === 'BIBLE' ? (
           /* Bible Hub */
-          <div className="flex flex-col flex-1 min-h-0 bg-zinc-900/10 rounded-xl border border-zinc-900/80 p-3.5 space-y-3">
+          <div className="flex flex-col flex-1 min-h-0 bg-zinc-900/10 rounded-xl border border-zinc-900/80 p-4 space-y-3">
             <div className="flex items-center justify-between border-b border-zinc-900/50 pb-2">
               <div className="flex items-center gap-2">
-                <History className="w-3.5 h-3.5 text-orange-400" />
-                <span className="text-[10px] font-mono font-black text-zinc-400 uppercase tracking-widest">Bible Hub</span>
+                <History className="w-4 h-4 text-orange-400" />
+                <span className="text-[11px] font-mono font-black text-zinc-400 uppercase tracking-widest">Bible Hub</span>
               </div>
               <div className="flex gap-1 bg-zinc-950 p-0.5 rounded-lg border border-zinc-800/60">
-                <button onClick={() => setBibleHubTab('history')} className={`py-1 px-2.5 rounded-md text-[9px] font-mono font-bold uppercase tracking-wide transition-all cursor-pointer ${bibleHubTab === 'history' ? 'bg-zinc-800 text-orange-400 border border-zinc-700' : 'text-zinc-500 hover:text-zinc-300'}`}>History</button>
-                <button onClick={() => setBibleHubTab('saved')} className={`py-1 px-2.5 rounded-md text-[9px] font-mono font-bold uppercase tracking-wide transition-all cursor-pointer ${bibleHubTab === 'saved' ? 'bg-zinc-800 text-orange-400 border border-zinc-700' : 'text-zinc-500 hover:text-zinc-300'}`}>Saved</button>
+                <button onClick={() => setBibleHubTab('history')} className={`py-1 px-3 rounded-md text-[10px] font-mono font-bold uppercase tracking-wide transition-all cursor-pointer ${bibleHubTab === 'history' ? 'bg-zinc-800 text-orange-400 border border-zinc-700' : 'text-zinc-500 hover:text-zinc-300'}`}>History</button>
+                <button onClick={() => setBibleHubTab('saved')} className={`py-1 px-3 rounded-md text-[10px] font-mono font-bold uppercase tracking-wide transition-all cursor-pointer ${bibleHubTab === 'saved' ? 'bg-zinc-800 text-orange-400 border border-zinc-700' : 'text-zinc-500 hover:text-zinc-300'}`}>Saved</button>
               </div>
             </div>
             <div className="flex-1 overflow-y-auto space-y-1.5 max-h-[200px]">
@@ -266,11 +267,11 @@ export default function LiveMonitor({
           </div>
         ) : (
           /* Setlist */
-          <div className="flex flex-col flex-1 min-h-0 bg-zinc-900/10 rounded-xl border border-zinc-900/80 p-3.5 space-y-3">
+          <div className="flex flex-col flex-1 min-h-0 bg-zinc-900/10 rounded-xl border border-zinc-900/80 p-4 space-y-3">
             <div className="flex items-center justify-between border-b border-zinc-900/50 pb-2">
               <div className="flex items-center gap-2">
-                <ListMusic className="w-3.5 h-3.5 text-orange-400" />
-                <span className="text-[10px] font-mono font-black text-zinc-400 uppercase tracking-widest">Setlist</span>
+                <ListMusic className="w-4 h-4 text-orange-400" />
+                <span className="text-[11px] font-mono font-black text-zinc-400 uppercase tracking-widest">Setlist</span>
               </div>
               {setlist.length > 0 && (
                 <span className="text-[9px] font-mono font-bold bg-zinc-900 px-2 py-0.5 rounded border border-zinc-800 text-zinc-400">{setlist.length}</span>

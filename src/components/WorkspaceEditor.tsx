@@ -264,21 +264,22 @@ export default function WorkspaceEditor({
   return (
     <div className="flex-1 flex flex-col h-full min-h-0 bg-zinc-950" id="center-column">
       
-      <div className="px-5 py-3 bg-zinc-950 border-b border-zinc-900 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shrink-0 select-none">
-        <div className="flex items-center gap-2.5 min-w-0">
-          <h1 className="text-sm font-semibold text-zinc-200 truncate">
+      <div className="px-5 py-3 bg-zinc-950 border-b border-zinc-900 flex items-center justify-between gap-3 shrink-0 select-none">
+        <div className="flex items-center gap-3 min-w-0">
+          <h1 className="text-base font-semibold text-zinc-200 truncate">
             {activePresentation.title}
           </h1>
+          <span className="text-[10px] font-mono text-zinc-500 bg-zinc-900/60 px-2.5 py-1 rounded-lg border border-zinc-800/60">{activePresentation.slides.length} slides</span>
         </div>
 
-        <div className="flex items-center gap-2 self-end sm:self-auto">
+        <div className="flex items-center gap-2 shrink-0">
           <button
             type="button"
             onClick={() => setShowScriptureModal(true)}
-            className="px-3.5 py-1.5 rounded-xl text-xs font-mono font-bold uppercase transition-all duration-200 cursor-pointer flex items-center gap-2 bg-zinc-900/60 hover:bg-zinc-850 text-zinc-300 hover:text-white border border-zinc-855"
+            className="px-4 py-2 rounded-xl text-xs font-mono font-bold uppercase transition-all duration-200 cursor-pointer flex items-center gap-2 bg-zinc-900/60 hover:bg-zinc-850 text-zinc-300 hover:text-white border border-zinc-855"
             title="Insert Quick Scripture slides"
           >
-            <BookOpen className="w-3.5 h-3.5 text-orange-450 animate-pulse" />
+            <BookOpen className="w-4 h-4 text-orange-450" />
             <span>+ Scripture</span>
           </button>
 
@@ -286,40 +287,40 @@ export default function WorkspaceEditor({
             <button
               type="button"
               onClick={() => setEditorMode('present')}
-              className={`px-3.5 py-1.5 rounded-lg text-xs font-mono font-bold uppercase transition-all duration-200 cursor-pointer flex items-center gap-2 ${
+              className={`px-4 py-2 rounded-lg text-xs font-mono font-bold uppercase transition-all duration-200 cursor-pointer flex items-center gap-2 ${
                 editorMode === 'present'
                   ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/15 font-black shadow-inner shadow-emerald-950/20'
                   : 'text-zinc-500 hover:text-zinc-300 border border-transparent'
               }`}
               title="Present Slides Mode"
             >
-              <Tv className="w-3.5 h-3.5" />
+              <Tv className="w-4 h-4" />
               <span>Present</span>
             </button>
             <button
               type="button"
               onClick={() => setEditorMode('edit')}
-              className={`px-3.5 py-1.5 rounded-lg text-xs font-mono font-bold uppercase transition-all duration-200 cursor-pointer flex items-center gap-2 ${
+              className={`px-4 py-2 rounded-lg text-xs font-mono font-bold uppercase transition-all duration-200 cursor-pointer flex items-center gap-2 ${
                 editorMode === 'edit'
                   ? 'bg-amber-500/10 text-amber-400 border border-amber-500/15 font-black shadow-inner shadow-amber-950/20'
                   : 'text-zinc-500 hover:text-zinc-300 border border-transparent'
               }`}
               title="Edit Plain Text Mode"
             >
-              <FileEdit className="w-3.5 h-3.5" />
+              <FileEdit className="w-4 h-4" />
               <span>Edit Lyrics</span>
             </button>
             <button
               type="button"
               onClick={() => setEditorMode('style')}
-              className={`px-3.5 py-1.5 rounded-lg text-xs font-mono font-bold uppercase transition-all duration-200 cursor-pointer flex items-center gap-2 ${
+              className={`px-4 py-2 rounded-lg text-xs font-mono font-bold uppercase transition-all duration-200 cursor-pointer flex items-center gap-2 ${
                 editorMode === 'style'
                   ? 'bg-orange-500/10 text-orange-400 border border-orange-500/15 font-black shadow-inner shadow-orange-950/20'
                   : 'text-zinc-500 hover:text-zinc-300 border border-transparent'
               }`}
               title="Style Designer Mode"
             >
-              <Sliders className="w-3.5 h-3.5" />
+              <Sliders className="w-4 h-4" />
               <span>Style Designer</span>
             </button>
           </div>
@@ -344,7 +345,7 @@ export default function WorkspaceEditor({
                 </button>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-5">
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
                 {displaySlides.map((slide, index) => {
                   const isLive = activeSlideIndex === index;
                   const badge = getHeaderBadgeStyle(slide.label);

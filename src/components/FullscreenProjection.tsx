@@ -25,9 +25,9 @@ export default function FullscreenProjection() {
   const {
     text, isBlackout, isTextCleared, isLowerThird, activeMode = 'SONGS',
     copyright, styleSettings, liveCaptionText, activeBackground, activeMedia,
-    bibleVerseFontSize = 56, bibleVerseFontColor = '#ffffff',
+    bibleVerseFontSize = 72, bibleVerseFontColor = '#ffffff',
     bibleVerseBgColor = '#000000', bibleVerseBgOpacity = 40,
-    bibleHeadingFontSize = 36, bibleHeadingFontColor = '#d4d4d8',
+    bibleHeadingFontSize = 48, bibleHeadingFontColor = '#ffffff',
     bibleHeadingBgColor = '#000000', bibleHeadingBgOpacity = 40,
     countdownActive = false, countdownDuration = 300, countdownStartTime = 0,
   } = packet;
@@ -117,7 +117,7 @@ export default function FullscreenProjection() {
     return `${r}, ${g}, ${b}`;
   }
 
-  const HEADER_FONT_SIZE = '4rem';
+  const HEADER_FONT_SIZE = '5rem';
 
   // Include fitVersion so React recomputes the style reliably after auto-fit updates.
   // (Even though fitScaleRef is a ref, fitVersion is state.)
@@ -132,8 +132,8 @@ export default function FullscreenProjection() {
   const customStyles: React.CSSProperties = {
     fontFamily: ss.fontFamily || 'system-ui',
     fontSize: isLowerThird || ss.lowerThirdMode === 'lyrics'
-      ? '2.4rem' 
-      : `${6 * fitScaleRef.current * (ss.fontSizeScale || 1.0)}rem`,
+      ? '3.2rem' 
+      : `${10 * fitScaleRef.current * (ss.fontSizeScale || 1.0)}rem`,
     fontWeight: ss.bold ? 'bold' : 'normal',
     fontStyle: ss.italic ? 'italic' : 'normal',
     textDecoration: ss.underline ? 'underline' : 'none',
@@ -288,7 +288,7 @@ export default function FullscreenProjection() {
           <motion.p
             ref={textFitRef}
             key={cleanText}
-            data-base-font-size="6"
+            data-base-font-size="10"
             data-fit-version={fitVersion}
             variants={containerVariants}
             initial="initial"
@@ -336,7 +336,7 @@ export default function FullscreenProjection() {
         <motion.p
           ref={textFitRef}
           key={cleanText}
-          data-base-font-size="6"
+          data-base-font-size="10"
           data-fit-version={fitVersion}
           initial={variants.initial}
           animate={variants.animate}
@@ -357,7 +357,7 @@ export default function FullscreenProjection() {
         <motion.p
           ref={textFitRef}
           key={cleanText}
-          data-base-font-size="6"
+          data-base-font-size="10"
           data-fit-version={fitVersion}
           variants={containerVariants}
           initial="initial"
@@ -389,7 +389,7 @@ export default function FullscreenProjection() {
       <motion.p
         ref={textFitRef}
         key={cleanText}
-        data-base-font-size="6"
+        data-base-font-size="10"
         data-fit-version={fitVersion}
         initial={variants.initial}
         animate={variants.animate}
@@ -406,11 +406,11 @@ export default function FullscreenProjection() {
 
   return (
     <div 
-      className="w-screen h-screen overflow-hidden bg-black cursor-pointer" 
+      className="w-screen h-screen overflow-hidden bg-black cursor-pointer fixed inset-0" 
       onDoubleClick={handleDoubleClick}
       title="Double click to close, or use arrow keys/space to move slides"
     >
-      <div className="w-full h-full flex flex-col relative select-none bg-black">
+      <div className="w-full h-full flex flex-col relative select-none bg-black" style={{ minHeight: '100vh' }}>
         {/* Background Engine */}
         <BackgroundRenderer
           type={ss?.bgType || activeBackground?.type || 'black'}
@@ -426,28 +426,28 @@ export default function FullscreenProjection() {
         <CountdownOverlay active={countdownActive} startTime={countdownStartTime} duration={countdownDuration} />
 
         {!isBlackout ? (
-          <div className="relative z-10 w-full h-full flex flex-col p-[2%]">
+          <div className="relative z-10 w-full h-full flex flex-col px-[4%] py-[3%]">
             
             {/* 2. FULLSCREEN CENTER CONTENT */}
             {!isTextCleared && text && !(isLowerThird || ss.lowerThirdMode === 'lyrics') && ss.lowerThirdMode !== 'speaker' && ss.lowerThirdMode !== 'ticker' && (
               activeMode === 'BIBLE' && copyright ? (
-                <div className="flex-1 flex flex-col items-center justify-center min-h-0 px-[4%]">
-                  <div className="flex flex-col items-center gap-4 mb-10 shrink-0">
+                <div className="flex-1 flex flex-col items-center justify-center min-h-0 px-[6%]">
+                  <div className="flex flex-col items-center gap-4 mb-14 shrink-0">
                     <h2
                       style={{
                         fontSize: `${bibleHeadingFontSize}px`,
                         color: bibleHeadingFontColor,
                       }}
-                      className="font-semibold tracking-[0.15em] select-none leading-none"
+                      className="font-bold tracking-[0.2em] select-none leading-none"
                     >
                       {copyright}
                     </h2>
-                    <div className="w-20 h-[3px] bg-orange-500/60 rounded-full" />
+                    <div className="w-24 h-[4px] bg-orange-500/70 rounded-full" />
                   </div>
                   <motion.div
                     ref={textFitRef}
                     key={cleanText}
-                    data-base-font-size="6"
+                    data-base-font-size="10"
                     data-fit-version={fitVersion}
                     variants={variants}
                     initial={variants.initial}
@@ -459,9 +459,9 @@ export default function FullscreenProjection() {
                       fontSize: `${bibleVerseFontSize}px`,
                       color: bibleVerseFontColor,
                       fontFamily: ss.fontFamily || 'system-ui',
-                      lineHeight: 1.3,
+                      lineHeight: 1.4,
                       textAlign: 'center',
-                      letterSpacing: '0.02em',
+                      letterSpacing: '0.03em',
                       textShadow: ss.shadowEnabled
                         ? `${ss.shadowX ?? 2}px ${ss.shadowY ?? 2}px ${ss.shadowBlur ?? 4}px ${ss.shadowColor || '#000000'}`
                         : 'none',
@@ -470,7 +470,7 @@ export default function FullscreenProjection() {
                         : 'none',
                     }}
                   >
-                    <div className="max-w-[90%] leading-[1.4] font-medium break-words whitespace-pre-wrap text-center">
+                    <div className="max-w-[88%] leading-[1.5] font-medium break-words whitespace-pre-wrap text-center">
                       {cleanText}
                     </div>
                   </motion.div>
@@ -583,17 +583,17 @@ export default function FullscreenProjection() {
 
             {/* 6. SPEECH TO TEXT LIVE CAPTIONS OVERLAY */}
             {liveCaptionText && (
-              <div className="absolute bottom-[8%] left-1/2 -translate-x-1/2 w-full max-w-4xl px-4 z-50">
+              <div className="absolute bottom-[8%] left-1/2 -translate-x-1/2 w-full max-w-5xl px-6 z-50">
                 <motion.div 
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="bg-black/85 backdrop-blur-md border border-zinc-800 px-6 py-3.5 rounded-2xl shadow-2xl text-center"
+                  className="bg-black/85 backdrop-blur-md border border-zinc-800 px-8 py-4 rounded-2xl shadow-2xl text-center"
                 >
-                  <p className="text-orange-450 font-mono text-[9px] tracking-wider uppercase font-extrabold mb-0.5 animate-pulse flex items-center justify-center gap-1.5 select-none">
+                  <p className="text-orange-450 font-mono text-[11px] tracking-wider uppercase font-extrabold mb-1 animate-pulse flex items-center justify-center gap-1.5 select-none">
                     <span className="w-1.5 h-1.5 bg-orange-500 rounded-full inline-block animate-ping" />
                     Live Captions
                   </p>
-                  <p className="text-white text-[1.25rem] font-medium tracking-wide leading-relaxed font-sans">
+                  <p className="text-white text-[1.6rem] font-medium tracking-wide leading-relaxed font-sans">
                     {liveCaptionText}
                   </p>
                 </motion.div>
@@ -602,14 +602,14 @@ export default function FullscreenProjection() {
 
             {/* 7. COPYRIGHT SONGS FOOTER */}
             {!isTextCleared && text && copyright && activeMode === 'SONGS' && (
-              <div className="shrink-0 pt-2 text-[0.8rem] text-center text-white/55 font-sans tracking-wider opacity-60">
+              <div className="shrink-0 pt-4 pb-2 text-[1.2rem] text-center text-white/70 font-sans tracking-wider opacity-80">
                 {copyright}
               </div>
             )}
 
           </div>
         ) : (
-          <div className="text-transparent flex-1 select-none pointer-events-none z-10 flex items-center justify-center">Cleared Stage</div>
+          <div className="text-transparent flex-1 select-none pointer-events-none z-10 flex items-center justify-center"></div>
         )}
 
 

@@ -93,3 +93,158 @@ export const BIBLE_BOOKS_METADATA: BibleBookInfo[] = [
   { id: 'JUD', bookNumber: 65, english: 'Jude', tamil: 'யூதா', tamilAbbrev: 'யூதா', category: 'General', chaptersCount: 1 },
   { id: 'REV', bookNumber: 66, english: 'Revelation', tamil: 'வெளிப்படுத்தின விசேஷம்', tamilAbbrev: 'வெளி', category: 'Revelation', chaptersCount: 22 }
 ];
+
+// Standardized abbreviations and aliases mapping for fast, precise lookup
+export const BIBLE_BOOK_ALIASES: Record<string, string[]> = {
+  'GEN': ['gen', 'genesis', 'gn', 'ஆதி', 'ஆதியாகமம்'],
+  'EXO': ['exo', 'exodus', 'ex', 'யாத்', 'யாத்திராகமம்'],
+  'LEV': ['lev', 'leviticus', 'lv', 'லேவி', 'லேவியராகமம்'],
+  'NUM': ['num', 'numbers', 'nm', 'எண்', 'எண்ணாகமம்'],
+  'DEU': ['deu', 'deuteronomy', 'dt', 'உப', 'உபாகமம்'],
+  'JOS': ['jos', 'joshua', 'josh', 'யோசு', 'யோசுவா'],
+  'JDG': ['jdg', 'judges', 'judg', 'நியா', 'நியாயாதிபதிகள்'],
+  'RUT': ['rut', 'ruth', 'ru', 'ரூத்'],
+  '1SA': ['1sa', '1samuel', '1sam', '1s', '1சாமு', '1சாமுவேல்'],
+  '2SA': ['2sa', '2samuel', '2sam', '2s', '2சாமு', '2சாமுவேல்'],
+  '1KI': ['1ki', '1kings', '1king', '1k', '1இரா', '1இராஜாக்கள்'],
+  '2KI': ['2ki', '2kings', '2king', '2k', '2இரா', '2இராஜாக்கள்'],
+  '1CH': ['1ch', '1chronicles', '1chron', '1c', '1நா', '1நாளாகமம்'],
+  '2CH': ['2ch', '2chronicles', '2chron', '2c', '2நா', '2நாளாகமம்'],
+  'EZR': ['ezr', 'ezra', 'எஸ்றா'],
+  'NEH': ['neh', 'nehemiah', 'நெகே', 'நெகேமியா'],
+  'EST': ['est', 'esther', 'எஸ்தர்'],
+  'JOB': ['job', 'யோபு'],
+  'PSA': ['psa', 'psalms', 'psalm', 'ps', 'சங்', 'சங்கீதம்'],
+  'PRO': ['pro', 'proverbs', 'prov', 'pr', 'நீதி', 'நீதிமொழிகள்'],
+  'ECC': ['ecc', 'ecclesiastes', 'ec', 'பிரச', 'பிரசங்கி'],
+  'SOS': ['sos', 'song', 'songofsolomon', 'sg', 'உதா', 'உன்னதப்பாட்டு'],
+  'ISA': ['isa', 'isaiah', 'is', 'ஏசா', 'ஏசாயா'],
+  'JER': ['jer', 'jeremiah', 'jr', 'எரே', 'எரேமியா'],
+  'LAM': ['lam', 'lamentations', 'புலம்', 'புலம்பல்'],
+  'EZE': ['eze', 'ezekiel', 'ez', 'எசே', 'எசேக்கியேல்'],
+  'DAN': ['dan', 'daniel', 'dn', 'தானி', 'தானியேல்'],
+  'HOS': ['hos', 'hosea', 'ஓசி', 'ஓசியா'],
+  'JOE': ['joe', 'joel', 'jl', 'யோவே', 'யோவேல்'],
+  'AMO': ['amo', 'amos', 'am', 'ஆமோ', 'ஆமோஸ்'],
+  'OBA': ['oba', 'obadiah', 'ob', 'ஒப', 'ஒபதியா'],
+  'JON': ['jon', 'jonah', 'யோனா'],
+  'MIC': ['mic', 'micah', 'மீகா'],
+  'NAH': ['nah', 'nahum', 'na', 'நாகு', 'நாகூம்'],
+  'HAB': ['hab', 'habakkuk', 'அப', 'அபகூக்'],
+  'ZEP': ['zep', 'zephaniah', 'செப்', 'செப்பனியா'],
+  'HAG': ['hag', 'haggai', 'ஆக', 'ஆகாய்'],
+  'ZEC': ['zec', 'zechariah', 'சக', 'சகரியா'],
+  'MAL': ['mal', 'malachi', 'மல்', 'மல்கியா'],
+  'MAT': ['mat', 'matthew', 'mt', 'மத்', 'மத்தேயு'],
+  'MRK': ['mrk', 'mark', 'mk', 'mar', 'மாற்', 'மாற்கு'],
+  'LUK': ['luk', 'luke', 'lk', 'லூக்', 'லூக்கா'],
+  'JHN': ['jhn', 'john', 'jn', 'joh', 'யோவா', 'யோவான்'],
+  'ACT': ['act', 'acts', 'ac', 'அப்', 'அப்போஸ்தலர்'],
+  'ROM': ['rom', 'romans', 'rm', 'ரோம', 'ரோமர்'],
+  '1CO': ['1co', '1corinthians', '1cor', '1c', '1கொரி', '1கொரிந்தியர்'],
+  '2CO': ['2co', '2corinthians', '2cor', '2c', '2கொரி', '2கொரிந்தியர்'],
+  'GAL': ['gal', 'galatians', 'கலா', 'கலாத்தியர்'],
+  'EPH': ['eph', 'ephesians', 'எபே', 'எபேசியர்'],
+  'PHP': ['php', 'philippians', 'phil', 'பிலி', 'பிலிப்பியர்'],
+  'COL': ['col', 'colossians', 'கொலோ', 'கொலோசெயர்'],
+  '1TH': ['1th', '1thessalonians', '1thess', '1தெச', '1தெசலோனிக்கேயர்'],
+  '2TH': ['2th', '2thessalonians', '2thess', '2தெச', '2தெசலோனிக்கேயர்'],
+  '1TI': ['1ti', '1timothy', '1tim', '1தீமோ', '1தீமோத்தேயு'],
+  '2TI': ['2ti', '2timothy', '2tim', '2தீமோ', '2தீமோத்தேயு'],
+  'TIT': ['tit', 'titus', 'தீத்து'],
+  'PHM': ['phm', 'philemon', 'பிலே', 'பிலேமோன்'],
+  'HEB': ['heb', 'hebrews', 'he', 'எபி', 'எபிரெயர்'],
+  'JAS': ['jas', 'james', 'jm', 'யாக்', 'யாக்கோபு'],
+  '1PE': ['1pe', '1peter', '1pet', '1p', '1பேது', '1பேதுரு'],
+  '2PE': ['2pe', '2peter', '2pet', '2p', '2பேது', '2பேதுரு'],
+  '1JN': ['1jn', '1john', '1jhn', '1j', '1யோவா', '1யோவான்'],
+  '2JN': ['2jn', '2john', '2jhn', '2j', '2யோவா', '2யோவான்'],
+  '3JN': ['3jn', '3john', '3jhn', '3j', '3யோவா', '3யோவான்'],
+  'JUD': ['jud', 'jude', 'யூதா'],
+  'REV': ['rev', 'revelation', 'revelations', 'வெளி', 'வெளிப்படுத்தின விசேஷம்']
+};
+
+// Map standard XML book identifiers/names to our internal BIBLE_BOOKS_METADATA id
+export function getBookInfo(xmlBookName: string): BibleBookInfo | undefined {
+  const name = xmlBookName.trim().toLowerCase();
+  if (!name) return undefined;
+
+  const cleanStr = (s: string) => s.replace(/[\s\-_\.]/g, '').toLowerCase();
+  const cleanedName = cleanStr(name);
+
+  // 0. Try numeric book number
+  const bookNum = parseInt(cleanedName, 10);
+  if (!isNaN(bookNum) && bookNum >= 1 && bookNum <= 66) {
+    const match = BIBLE_BOOKS_METADATA.find(b => b.bookNumber === bookNum);
+    if (match) return match;
+  }
+
+  // 1. Direct match on ID
+  let match = BIBLE_BOOKS_METADATA.find(b => cleanStr(b.id) === cleanedName);
+  if (match) return match;
+
+  // 2. Exact alias match
+  for (const [bookId, aliases] of Object.entries(BIBLE_BOOK_ALIASES)) {
+    if (aliases.some(alias => cleanStr(alias) === cleanedName)) {
+      const found = BIBLE_BOOKS_METADATA.find(b => b.id === bookId);
+      if (found) return found;
+    }
+  }
+
+  // 3. Exact English name
+  match = BIBLE_BOOKS_METADATA.find(b => cleanStr(b.english) === cleanedName);
+  if (match) return match;
+
+  // 4. Exact Tamil name/abbreviation
+  match = BIBLE_BOOKS_METADATA.find(
+    b => cleanStr(b.tamil) === cleanedName || cleanStr(b.tamilAbbrev) === cleanedName
+  );
+  if (match) return match;
+
+  // 5. Starts-with English
+  match = BIBLE_BOOKS_METADATA.find(b => cleanStr(b.english).startsWith(cleanedName));
+  if (match) return match;
+
+  // 6. Starts-with Tamil
+  match = BIBLE_BOOKS_METADATA.find(
+    b => cleanStr(b.tamil).startsWith(cleanedName) || cleanStr(b.tamilAbbrev).startsWith(cleanedName)
+  );
+  if (match) return match;
+
+  // 7. Starts-with alias
+  for (const [bookId, aliases] of Object.entries(BIBLE_BOOK_ALIASES)) {
+    if (aliases.some(alias => cleanStr(alias).startsWith(cleanedName))) {
+      const found = BIBLE_BOOKS_METADATA.find(b => b.id === bookId);
+      if (found) return found;
+    }
+  }
+
+  // 8. Containment match
+  match = BIBLE_BOOKS_METADATA.find(
+    b => cleanStr(b.english).includes(cleanedName) || cleanedName.includes(cleanStr(b.english))
+  );
+  if (match) return match;
+
+  // 9. Levenshtein fallback
+  const levenshtein = (a: string, b: string): number => {
+    const matrix = Array.from({ length: a.length + 1 }, (_, i) => [i]);
+    for (let j = 0; j <= b.length; j++) matrix[0][j] = j;
+    for (let i = 1; i <= a.length; i++)
+      for (let j = 1; j <= b.length; j++)
+        matrix[i][j] = Math.min(matrix[i-1][j]+1, matrix[i][j-1]+1, matrix[i-1][j-1]+(a[i-1]===b[j-1]?0:1));
+    return matrix[a.length][b.length];
+  };
+
+  if (cleanedName.length >= 3) {
+    let bestMatch: BibleBookInfo | undefined;
+    let minDist = Infinity;
+    for (const book of BIBLE_BOOKS_METADATA) {
+      const dist = levenshtein(cleanedName, cleanStr(book.english));
+      const allowed = cleanedName.length <= 4 ? 1 : 2;
+      if (dist <= allowed && dist < minDist) { minDist = dist; bestMatch = book; }
+    }
+    if (bestMatch) return bestMatch;
+  }
+
+  return undefined;
+}
